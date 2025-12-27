@@ -16,6 +16,7 @@ namespace Assets.Scripts.Guis
         #region Runtime Widgets
         public static TextMeshProUGUI? TimeScaleValueText { get; private set; }
         public static TextMeshProUGUI? VisualPresetValueText { get; private set; }
+        public static TextMeshProUGUI? AppVersionText { get; private set; }
 
         public static Slider? TimeScaleSlider { get; private set; }
         public static Slider? VisualPresetSlider { get; private set; }
@@ -189,6 +190,7 @@ namespace Assets.Scripts.Guis
                 togglesByName.Add(_toggle.name, _toggle);
             }
 
+            AppVersionText = GetTextByName("AppVersionText");
             TimeScaleValueText = GetTextByName("TimeScaleValueText");
             VisualPresetValueText = GetTextByName("VisualPresetValueText");
 
@@ -214,6 +216,7 @@ namespace Assets.Scripts.Guis
             slidersByName.Clear();
             togglesByName.Clear();
 
+            AppVersionText = null;
             TimeScaleValueText = null;
             VisualPresetValueText = null;
 

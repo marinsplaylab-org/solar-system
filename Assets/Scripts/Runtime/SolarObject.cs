@@ -30,7 +30,6 @@ namespace Assets.Scripts.Runtime
             public bool ShowSpinAxisLines = true;
             public bool ShowWorldUpLines = true;
             public float RuntimeLineWidthScale = 1.0f;
-            public bool RuntimeLineStylesDirty = true;
         }
         #endregion
 
@@ -97,6 +96,7 @@ namespace Assets.Scripts.Runtime
         private bool hasPrimaryPosition = false;
 
         private static Material? lineMaterial;
+        private bool lineStylesDirty = true;
         #endregion
 
         #region Public API
@@ -107,6 +107,7 @@ namespace Assets.Scripts.Runtime
         {
             primaryTransform = _primaryTransform;
             visualContext = _visualContext;
+            lineStylesDirty = true;
 
             id = _data.Id;
             isReference = _data.IsReference;
@@ -169,6 +170,7 @@ namespace Assets.Scripts.Runtime
         public void RefreshVisuals(VisualContext _visualContext)
         {
             visualContext = _visualContext;
+            lineStylesDirty = true;
 
             if (!isReference)
             {
@@ -177,6 +179,14 @@ namespace Assets.Scripts.Runtime
             }
 
             orbitPointsDirty = true;
+        }
+
+        /// <summary>
+        /// Mark runtime line widths as needing a refresh.
+        /// </summary>
+        public void MarkLineStylesDirty()
+        {
+            lineStylesDirty = true;
         }
         #endregion
 
@@ -463,10 +473,9 @@ namespace Assets.Scripts.Runtime
                 DeactivateAxisLines();
             }
 
-            if (visualContext.RuntimeLineStylesDirty)
+            if (lineStylesDirty && ApplyRuntimeLineStyles())
             {
-                ApplyRuntimeLineStyles();
-                visualContext.RuntimeLineStylesDirty = false;
+                lineStylesDirty = false;
             }
         }
 
@@ -647,15 +656,17 @@ namespace Assets.Scripts.Runtime
         /// <summary>
         /// Scale line widths based on global distance/radius settings.
         /// </summary>
-        private void ApplyRuntimeLineStyles()
+        private bool ApplyRuntimeLineStyles()
         {
             float _scale = GetLineWidthScale();
+            bool _applied = false;
 
             if (orbitLine != null)
             {
                 float _width = Mathf.Max(0.0001f, orbitLineWidth * _scale);
                 orbitLine.startWidth = _width;
                 orbitLine.endWidth = _width;
+                _applied = true;
             }
 
             if (axisLine != null)
@@ -663,6 +674,7 @@ namespace Assets.Scripts.Runtime
                 float _width = Mathf.Max(0.0001f, axisLineWidth * _scale);
                 axisLine.startWidth = _width;
                 axisLine.endWidth = _width;
+                _applied = true;
             }
 
             if (worldUpLine != null)
@@ -670,7 +682,10 @@ namespace Assets.Scripts.Runtime
                 float _width = Mathf.Max(0.0001f, axisLineWidth * _scale);
                 worldUpLine.startWidth = _width;
                 worldUpLine.endWidth = _width;
+                _applied = true;
             }
+
+            return _applied;
         }
 
         /// <summary>

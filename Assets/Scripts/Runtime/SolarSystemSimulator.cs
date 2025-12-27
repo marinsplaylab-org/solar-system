@@ -132,6 +132,7 @@ namespace Assets.Scripts.Runtime
             SetupRuntimeGui();
             guiInitialized = true;
 
+            UpdateAppVersionText();
             ApplyVisualPresetLevel(visualPresetLevelIndex, true);
             UpdateTimeScaleText();
         }
@@ -465,7 +466,7 @@ namespace Assets.Scripts.Runtime
             }
 
             visualContext.ShowOrbitLines = _enabled;
-            visualContext.RuntimeLineStylesDirty = true;
+            MarkAllLineStylesDirty();
         }
 
         /// <summary>
@@ -479,7 +480,7 @@ namespace Assets.Scripts.Runtime
             }
 
             visualContext.ShowSpinAxisLines = _enabled;
-            visualContext.RuntimeLineStylesDirty = true;
+            MarkAllLineStylesDirty();
         }
 
         /// <summary>
@@ -493,7 +494,7 @@ namespace Assets.Scripts.Runtime
             }
 
             visualContext.ShowWorldUpLines = _enabled;
-            visualContext.RuntimeLineStylesDirty = true;
+            MarkAllLineStylesDirty();
         }
 
         /// <summary>
@@ -504,6 +505,17 @@ namespace Assets.Scripts.Runtime
             foreach (KeyValuePair<string, SolarObject> _pair in instancesById)
             {
                 _pair.Value.RefreshVisuals(visualContext);
+            }
+        }
+
+        /// <summary>
+        /// Mark runtime line widths as dirty for all objects.
+        /// </summary>
+        private void MarkAllLineStylesDirty()
+        {
+            foreach (KeyValuePair<string, SolarObject> _pair in instancesById)
+            {
+                _pair.Value.MarkLineStylesDirty();
             }
         }
 
@@ -522,6 +534,20 @@ namespace Assets.Scripts.Runtime
                 Gui.TimeScaleValueText.text =
                     $"Time Scale: {_label} ({timeScale:0.##}x, Sim {_simDays:0.00} d)";
             }
+        }
+
+        /// <summary>
+        /// Update the application version label once at startup.
+        /// </summary>
+        private void UpdateAppVersionText()
+        {
+            if (Gui.AppVersionText == null)
+            {
+                return;
+            }
+
+            string _version = string.IsNullOrWhiteSpace(Application.version) ? "0.0.0" : Application.version;
+            Gui.AppVersionText.text = $"Version: {_version}";
         }
 
         /// <summary>
@@ -562,14 +588,14 @@ namespace Assets.Scripts.Runtime
             visualContext.GlobalDistanceMultiplier = visualPresetDistanceValues[visualPresetLevelIndex];
             visualContext.GlobalRadiusMultiplier = visualPresetRadiusValues[visualPresetLevelIndex];
             visualContext.OrbitPathSegments = visualPresetOrbitSegmentsValues[visualPresetLevelIndex];
-            visualContext.RuntimeLineWidthScale = visualPresetLevelIndex == 0 ? 1.0f : 0.5f;
-            visualContext.RuntimeLineStylesDirty = true;
+            visualContext.RuntimeLineWidthScale = visualPresetLevelIndex == 0 ? 1.0f : 0.25f;
 
             if (_refreshVisuals)
             {
                 RefreshAllVisuals();
             }
 
+            MarkAllLineStylesDirty();
             UpdateVisualPresetText();
         }
         #endregion
