@@ -310,6 +310,8 @@ Code is licensed under the **MIT License** (see `LICENSE`).
 
 Third-party assets (textures/models/fonts) are attributed in `CREDITS.md` and remain subject to their original terms.
 
+Custom shaders in `Assets/Shaders` are original made by MarinsPlayLab and are free to use under the MIT License.
+
 ---
 
 ## Contributing / Feedback
