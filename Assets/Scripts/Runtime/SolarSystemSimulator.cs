@@ -128,7 +128,7 @@ namespace Assets.Scripts.Runtime
                 return;
             }
 
-            Gui.AllocateInteractionWidgets();
+            Gui.Initialize();
             SetupRuntimeGui();
             guiInitialized = true;
 
@@ -154,7 +154,7 @@ namespace Assets.Scripts.Runtime
             Gui.SpinAxisToggled -= HandleSpinAxisToggled;
             Gui.WorldUpToggled -= HandleWorldUpToggled;
 
-            Gui.DeallocateInteractionWidgets();
+            Gui.UnInitialize();
         }
 
         /// <summary>

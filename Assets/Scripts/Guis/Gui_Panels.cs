@@ -28,6 +28,12 @@ namespace Assets.Scripts.Guis
         /// </summary>
         public static void Show(Panel _panelToShow, bool _hideAllOtherPanels = true)
         {
+            if (panels.Count == 0)
+            {
+                HelpLogs.Warn("Gui", "Panels not allocated; can not show panel.");
+                return;
+            }
+
             if (_hideAllOtherPanels)
             {
                 Hide();
@@ -47,6 +53,12 @@ namespace Assets.Scripts.Guis
         /// </summary>
         public static void Hide(Panel _panelToHide)
         {
+            if (panels.Count == 0)
+            {
+                HelpLogs.Warn("Gui", "Panels not allocated; can not hide panel.");
+                return;
+            }
+
             foreach (GameObject _panel in panels)
             {
                 if (_panel.name == _panelToHide.ToString())
@@ -61,6 +73,12 @@ namespace Assets.Scripts.Guis
         /// </summary>
         public static void Hide()
         {
+            if (panels.Count == 0)
+            {
+                HelpLogs.Warn("Gui", "Panels not allocated; can not hide panels.");
+                return;
+            }
+
             foreach (GameObject _panel in panels)
             {
                 _panel.SetActive(false);
@@ -72,8 +90,14 @@ namespace Assets.Scripts.Guis
         /// <summary>
         /// Cache all panel game objects from the active canvas.
         /// </summary>
-        public static void AllocatePanels()
+        private static void AllocatePanels()
         {
+            if (panels.Count > 0)
+            {
+                HelpLogs.Warn("Gui", "Panels already allocated; skipping duplicate allocation.");
+                return;
+            }
+
             Canvas _canvas = GameObject.FindFirstObjectByType<Canvas>();
 
             if (_canvas == null)
@@ -100,7 +124,7 @@ namespace Assets.Scripts.Guis
         /// <summary>
         /// Clear cached panels.
         /// </summary>
-        public static void DeallocatePanels()
+        private static void DeallocatePanels()
         {
             panels.Clear();
             HelpLogs.Log("Gui", "Deallocated panels");

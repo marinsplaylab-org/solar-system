@@ -126,7 +126,7 @@ namespace Assets.Scripts.Guis
         /// <summary>
         /// Discover and cache all runtime control widgets in the active canvas.
         /// </summary>
-        public static void AllocateInteractionWidgets()
+        private static void AllocateInteractionWidgets()
         {
             Canvas _canvas = GameObject.FindFirstObjectByType<Canvas>();
             if (_canvas == null)
@@ -210,7 +210,7 @@ namespace Assets.Scripts.Guis
         /// <summary>
         /// Clear cached references to runtime control widgets.
         /// </summary>
-        public static void DeallocateInteractionWidgets()
+        private static void DeallocateInteractionWidgets()
         {
             textsByName.Clear();
             slidersByName.Clear();
