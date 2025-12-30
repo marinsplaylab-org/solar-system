@@ -372,6 +372,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Runtime.SolarSystemSimulator
   resourcesJsonPathWithoutExtension: SolarSystemData
+  realisticJsonPathWithoutExtension: SolarSystemData_J2000_Keplerian_all_moons
   prefabsResourcesFolder: SolarObjects
   enableRuntimeControls: 1
   sunLightNormalIntensity: 30000
@@ -2491,7 +2492,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &556893501
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4863,7 +4864,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1495504244
 RectTransform:
   m_ObjectHideFlags: 0

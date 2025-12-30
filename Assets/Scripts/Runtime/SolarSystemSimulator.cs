@@ -18,6 +18,9 @@ namespace Assets.Scripts.Runtime
         [Header("JSON (Resources)")]
         // Resources path (no extension) to the solar system dataset.
         [SerializeField] private string resourcesJsonPathWithoutExtension = "SolarSystemData";
+        // Optional keplerian dataset for the Realistic preset.
+        [SerializeField] private string realisticJsonPathWithoutExtension =
+            "SolarSystemData_J2000_Keplerian_all_moons";
 
         [Header("Prefabs (Resources)")]
         // Resources folder that contains planet/moon prefabs.
@@ -44,8 +47,10 @@ namespace Assets.Scripts.Runtime
         #region Runtime State
         // Accumulated simulation time in seconds.
         private double simulationTimeSeconds = 0.0;
-        // Loaded dataset and lookup tables.
-        private SolarSystemJsonLoader.Result? json_database;
+        // Loaded datasets and lookup tables.
+        private SolarSystemJsonLoader.Result? simulationDatabase;
+        private SolarSystemJsonLoader.Result? realisticDatabase;
+        private SolarSystemJsonLoader.Result? activeDatabase;
 
         // Spawned SolarObject instances keyed by id.
         private readonly Dictionary<string, SolarObject> instancesById =
@@ -117,8 +122,10 @@ namespace Assets.Scripts.Runtime
         {
             Application.targetFrameRate = 60;
 
-            json_database = SolarSystemJsonLoader.LoadOrLog(resourcesJsonPathWithoutExtension);
-            if (json_database == null)
+            visualPresetLevelIndex = enableRuntimeControls ? 1 : 0;
+
+            simulationDatabase = SolarSystemJsonLoader.LoadOrLog(resourcesJsonPathWithoutExtension);
+            if (simulationDatabase == null)
             {
                 HelpLogs.Error(
                     "Simulator",
@@ -128,11 +135,19 @@ namespace Assets.Scripts.Runtime
                 return;
             }
 
-            BuildVisualContext(json_database);
+            realisticDatabase = LoadRealisticDatabase(simulationDatabase);
+            activeDatabase = GetDatabaseForPreset(visualPresetLevelIndex);
+
+            if (activeDatabase == null)
+            {
+                HelpLogs.Error("Simulator", "No dataset available to initialize the simulator.");
+                enabled = false;
+                return;
+            }
+
             LoadPrefabsFromResources();
 
-            SpawnAll(json_database);
-            InitializeAllTwoPass(json_database);
+            ApplyDatabase(activeDatabase, visualPresetLevelIndex, true);
             SolarObjectsReady?.Invoke(orderedSolarObjects);
 
             HelpLogs.Log("Simulator", $"Ready. Objects spawned: {instancesById.Count}");
@@ -199,7 +214,7 @@ namespace Assets.Scripts.Runtime
         /// </summary>
         private void Update()
         {
-            if (json_database == null)
+            if (activeDatabase == null)
             {
                 return;
             }
@@ -248,14 +263,152 @@ namespace Assets.Scripts.Runtime
             {
                 visualContext.ReferenceSolarObjectRadiusKm = _sunData.TruthPhysical?.MeanRadiusKm ?? 695700.0;
             }
+        }
 
-            if (enableRuntimeControls)
+        #region Dataset Management
+        private SolarSystemJsonLoader.Result? LoadRealisticDatabase(SolarSystemJsonLoader.Result _fallback)
+        {
+            if (string.IsNullOrWhiteSpace(realisticJsonPathWithoutExtension))
             {
-                visualContext.GlobalDistanceMultiplier = 0.02;
-                visualContext.GlobalRadiusMultiplier = 0.25;
-                visualContext.OrbitPathSegments = 64;
+                return _fallback;
+            }
+
+            SolarSystemJsonLoader.Result? _result =
+                SolarSystemJsonLoader.LoadOrLog(realisticJsonPathWithoutExtension);
+            if (_result == null)
+            {
+                HelpLogs.Warn(
+                    "Simulator",
+                    $"Realistic dataset '{realisticJsonPathWithoutExtension}' failed to load. Using simulation dataset."
+                );
+                return _fallback;
+            }
+
+            return _result;
+        }
+
+        private SolarSystemJsonLoader.Result? GetDatabaseForPreset(int _presetIndex)
+        {
+            if (!enableRuntimeControls)
+            {
+                return simulationDatabase;
+            }
+
+            if (_presetIndex == 0)
+            {
+                return realisticDatabase ?? simulationDatabase;
+            }
+
+            return simulationDatabase;
+        }
+
+        private bool EnsureActiveDatabaseForPreset(int _presetIndex)
+        {
+            SolarSystemJsonLoader.Result? _target = GetDatabaseForPreset(_presetIndex);
+            if (_target == null || ReferenceEquals(_target, activeDatabase))
+            {
+                return false;
+            }
+
+            ApplyDatabase(_target, _presetIndex, false);
+            return true;
+        }
+
+        private void ApplyDatabase(SolarSystemJsonLoader.Result _db, int _presetIndex, bool _forceRespawn)
+        {
+            activeDatabase = _db;
+            BuildVisualContext(_db);
+            UpdateVisualPresetDefaultsFromContext();
+            ApplyVisualPresetValues(_presetIndex);
+
+            bool _canReinit = CanReinitializeInPlace(_db);
+            if (_forceRespawn || !_canReinit)
+            {
+                DestroyAllInstances();
+                SpawnAll(_db);
+            }
+
+            InitializeAllTwoPass(_db);
+            RebuildOrderedSolarObjects(_db);
+
+            for (int _i = 0; _i < orderedSolarObjects.Count; _i++)
+            {
+                orderedSolarObjects[_i].Simulate(simulationTimeSeconds);
             }
         }
+
+        private bool CanReinitializeInPlace(SolarSystemJsonLoader.Result _db)
+        {
+            if (instancesById.Count == 0)
+            {
+                return false;
+            }
+
+            if (instancesById.Count != _db.ById.Count)
+            {
+                return false;
+            }
+
+            foreach (string _id in _db.ById.Keys)
+            {
+                if (!instancesById.ContainsKey(_id))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void DestroyAllInstances()
+        {
+            foreach (KeyValuePair<string, SolarObject> _pair in instancesById)
+            {
+                if (_pair.Value != null)
+                {
+                    Destroy(_pair.Value.gameObject);
+                }
+            }
+
+            instancesById.Clear();
+            orderedSolarObjects.Clear();
+        }
+
+        private void RebuildOrderedSolarObjects(SolarSystemJsonLoader.Result _db)
+        {
+            orderedSolarObjects.Clear();
+
+            List<SolarObjectData> _sorted = new List<SolarObjectData>(_db.ById.Values);
+            _sorted.Sort((_a, _b) =>
+            {
+                int _ar = _a.IsReference ? 0 : 1;
+                int _br = _b.IsReference ? 0 : 1;
+                if (_ar != _br)
+                {
+                    return _ar.CompareTo(_br);
+                }
+
+                int _ao = _a.OrderFromSun ?? int.MaxValue;
+                int _bo = _b.OrderFromSun ?? int.MaxValue;
+                int _cmp = _ao.CompareTo(_bo);
+                if (_cmp != 0)
+                {
+                    return _cmp;
+                }
+
+                return string.Compare(_a.Id, _b.Id, StringComparison.OrdinalIgnoreCase);
+            });
+
+            for (int _i = 0; _i < _sorted.Count; _i++)
+            {
+                SolarObjectData _data = _sorted[_i];
+                if (instancesById.TryGetValue(_data.Id, out SolarObject _instance))
+                {
+                    orderedSolarObjects.Add(_instance);
+                }
+            }
+        }
+        #endregion
 
         /// <summary>
         /// Load all prefabs from Resources into a name lookup table.
@@ -413,6 +566,29 @@ namespace Assets.Scripts.Runtime
         /// <summary>
         /// Configure runtime control values and defaults.
         /// </summary>
+        private void UpdateVisualPresetDefaultsFromContext()
+        {
+            visualPresetDistanceValues[0] = (float)defaultGlobalDistanceMultiplier;
+            visualPresetDistanceValues[1] = 0.02f;
+
+            visualPresetRadiusValues[0] = (float)defaultGlobalRadiusMultiplier;
+            visualPresetRadiusValues[1] = 0.25f;
+
+            visualPresetOrbitSegmentsValues[0] = 128;
+            visualPresetOrbitSegmentsValues[1] = 64;
+        }
+
+        private void ApplyVisualPresetValues(int _levelIndex)
+        {
+            int _clamped = Mathf.Clamp(_levelIndex, 0, visualPresetLevelNames.Length - 1);
+            bool _isRealistic = _clamped == 0;
+            visualContext.GlobalDistanceMultiplier = visualPresetDistanceValues[_clamped];
+            visualContext.GlobalRadiusMultiplier = visualPresetRadiusValues[_clamped];
+            visualContext.OrbitPathSegments = visualPresetOrbitSegmentsValues[_clamped];
+            visualContext.RuntimeLineWidthScale = _clamped == 0 ? 1.0f : 0.25f;
+            visualContext.UseVisualDefaults = !enableRuntimeControls || !_isRealistic;
+        }
+
         private void SetupRuntimeGui()
         {
             if (!enableRuntimeControls)
@@ -429,15 +605,7 @@ namespace Assets.Scripts.Runtime
             timeScaleLevelIndex = 1;
             timeScale = timeScaleLevelValues[timeScaleLevelIndex];
 
-            visualPresetDistanceValues[0] = (float)defaultGlobalDistanceMultiplier;
-            visualPresetDistanceValues[1] = 0.02f;
-
-            visualPresetRadiusValues[0] = (float)defaultGlobalRadiusMultiplier;
-            visualPresetRadiusValues[1] = 0.25f;
-
-            visualPresetOrbitSegmentsValues[0] = 128;
-            visualPresetOrbitSegmentsValues[1] = 64;
-
+            UpdateVisualPresetDefaultsFromContext();
             visualPresetLevelIndex = 1;
 
             if (Gui.OrbitLinesToggle != null)
@@ -623,16 +791,14 @@ namespace Assets.Scripts.Runtime
         private void ApplyVisualPresetLevel(int _levelIndex, bool _refreshVisuals)
         {
             int _clamped = Mathf.Clamp(_levelIndex, 0, visualPresetLevelNames.Length - 1);
-            if (_clamped == visualPresetLevelIndex && !_refreshVisuals)
+            bool _datasetChanged = EnsureActiveDatabaseForPreset(_clamped);
+            if (_clamped == visualPresetLevelIndex && !_refreshVisuals && !_datasetChanged)
             {
                 return;
             }
 
             visualPresetLevelIndex = _clamped;
-            visualContext.GlobalDistanceMultiplier = visualPresetDistanceValues[visualPresetLevelIndex];
-            visualContext.GlobalRadiusMultiplier = visualPresetRadiusValues[visualPresetLevelIndex];
-            visualContext.OrbitPathSegments = visualPresetOrbitSegmentsValues[visualPresetLevelIndex];
-            visualContext.RuntimeLineWidthScale = visualPresetLevelIndex == 0 ? 1.0f : 0.25f;
+            ApplyVisualPresetValues(visualPresetLevelIndex);
 
             VisualPresetChanged?.Invoke(visualPresetLevelIndex);
 
@@ -655,6 +821,11 @@ namespace Assets.Scripts.Runtime
 
             MarkAllLineStylesDirty();
             UpdateVisualPresetText();
+
+            if (_datasetChanged)
+            {
+                SolarObjectsReady?.Invoke(orderedSolarObjects);
+            }
         }
 
         /// <summary>

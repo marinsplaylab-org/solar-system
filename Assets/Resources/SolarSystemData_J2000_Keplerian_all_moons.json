@@ -1,0 +1,681 @@
+{
+  "meta": {
+    "schema_version": "1.0.0",
+    "notes": [
+      "Unity visualization dataset"
+    ]
+  },
+  "global_visual_defaults": {
+    "distance_km_per_unity_unit": 1000000.0,
+    "global_distance_multiplier": 1.0,
+    "global_radius_multiplier": 1.0,
+    "orbit_path_segments_default": 256,
+    "moon_clearance_unity": 0.02
+  },
+  "solar_objects": [
+    {
+      "id": "sun",
+      "type": "star",
+      "display_name": "Sun",
+      "order_from_sun": 0,
+      "primary_id": null,
+      "is_reference": true,
+      "truth_physical": {
+        "mean_radius_km": 695700.0
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_days": 25.38,
+        "axial_tilt_deg": 7.25
+      },
+      "visual_defaults": {
+        "radius_multiplier": 1.0,
+        "distance_multiplier": 1.0
+      },
+      "spawn": {
+        "position_unity": [
+          0,
+          0,
+          0
+        ],
+        "scale_unity": [
+          1,
+          1,
+          1
+        ],
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "mercury",
+      "type": "planet",
+      "display_name": "Mercury",
+      "order_from_sun": 1,
+      "primary_id": "sun",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 2439.7
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_days": 58.646,
+        "axial_tilt_deg": 0.034
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 0.38709927,
+        "orbital_period_days": 87.969257,
+        "eccentricity": 0.20563593,
+        "inclination_deg": 7.00497902,
+        "longitude_ascending_node_deg": 48.33076593,
+        "argument_periapsis_deg": 29.12703035,
+        "mean_anomaly_deg": 174.79252722
+      },
+      "visual_defaults": {
+        "radius_multiplier": 34.23,
+        "distance_multiplier": 0.776
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "venus",
+      "type": "planet",
+      "display_name": "Venus",
+      "order_from_sun": 2,
+      "primary_id": "sun",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 6051.8
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_days": 243.025,
+        "axial_tilt_deg": 177.36
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 0.72333566,
+        "orbital_period_days": 224.700799,
+        "eccentricity": 0.00677672,
+        "inclination_deg": 3.39467605,
+        "longitude_ascending_node_deg": 76.67984255,
+        "argument_periapsis_deg": 54.92262463,
+        "mean_anomaly_deg": 50.37663232
+      },
+      "visual_defaults": {
+        "radius_multiplier": 20.697,
+        "distance_multiplier": 0.461
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "earth",
+      "type": "planet",
+      "display_name": "Earth",
+      "order_from_sun": 3,
+      "primary_id": "sun",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 6371.0
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_hours": 23.934,
+        "axial_tilt_deg": 23.44
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 1.00000261,
+        "orbital_period_days": 365.256355,
+        "eccentricity": 0.01671123,
+        "inclination_deg": 0.0,
+        "longitude_ascending_node_deg": 0.0,
+        "argument_periapsis_deg": 102.93768193,
+        "mean_anomaly_deg": 357.52688973
+      },
+      "visual_defaults": {
+        "radius_multiplier": 21.842,
+        "distance_multiplier": 0.468
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "moon",
+      "type": "moon",
+      "display_name": "Moon",
+      "order_from_sun": null,
+      "primary_id": "earth",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 1737.4
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_days": 27.3217,
+        "axial_tilt_deg": 6.68
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 0.0025695552897999907,
+        "orbital_period_days": 27.322,
+        "eccentricity": 0.0554,
+        "inclination_deg": 5.16,
+        "longitude_ascending_node_deg": 125.08,
+        "argument_periapsis_deg": 318.15,
+        "mean_anomaly_deg": 135.27
+      },
+      "visual_defaults": {
+        "radius_multiplier": 32.04,
+        "distance_multiplier": 15.61
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "mars",
+      "type": "planet",
+      "display_name": "Mars",
+      "order_from_sun": 4,
+      "primary_id": "sun",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 3389.5
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_hours": 24.623,
+        "axial_tilt_deg": 25.19
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 1.52371034,
+        "orbital_period_days": 686.979586,
+        "eccentricity": 0.0933941,
+        "inclination_deg": 1.84969142,
+        "longitude_ascending_node_deg": 49.55953891,
+        "argument_periapsis_deg": 286.4968315,
+        "mean_anomaly_deg": 19.39019754
+      },
+      "visual_defaults": {
+        "radius_multiplier": 32.835,
+        "distance_multiplier": 0.415
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "phobos",
+      "type": "moon",
+      "display_name": "Phobos",
+      "order_from_sun": null,
+      "primary_id": "mars",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 11.2667
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_days": 0.31891023,
+        "axial_tilt_deg": 0.0
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 6.266800427126668e-05,
+        "orbital_period_days": 0.3187,
+        "eccentricity": 0.015,
+        "inclination_deg": 1.1,
+        "longitude_ascending_node_deg": 169.2,
+        "argument_periapsis_deg": 216.3,
+        "mean_anomaly_deg": 189.7
+      },
+      "visual_defaults": {
+        "radius_multiplier": 1852.0,
+        "distance_multiplier": 234.7
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "deimos",
+      "type": "moon",
+      "display_name": "Deimos",
+      "order_from_sun": null,
+      "primary_id": "mars",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 6.2
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_days": 1.26244,
+        "axial_tilt_deg": 0.0
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 0.00015680036012705095,
+        "orbital_period_days": 1.2625,
+        "eccentricity": 0.0,
+        "inclination_deg": 1.8,
+        "longitude_ascending_node_deg": 54.3,
+        "argument_periapsis_deg": 0.0,
+        "mean_anomaly_deg": 205.0
+      },
+      "visual_defaults": {
+        "radius_multiplier": 2805.0,
+        "distance_multiplier": 127.9
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "jupiter",
+      "type": "planet",
+      "display_name": "Jupiter",
+      "order_from_sun": 5,
+      "primary_id": "sun",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 69911.0
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_hours": 9.925,
+        "axial_tilt_deg": 3.13
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 5.202887,
+        "orbital_period_days": 4332.820129,
+        "eccentricity": 0.04838624,
+        "inclination_deg": 1.30439695,
+        "longitude_ascending_node_deg": 100.47390909,
+        "argument_periapsis_deg": 274.25457074,
+        "mean_anomaly_deg": 19.66796068
+      },
+      "visual_defaults": {
+        "radius_multiplier": 4.975,
+        "distance_multiplier": 0.192
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "io",
+      "type": "moon",
+      "display_name": "Io",
+      "primary_id": "jupiter",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 1821.6
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_days": 1.769,
+        "axial_tilt_deg": 0.0
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 0.0028195588481728304,
+        "orbital_period_days": 1.762732,
+        "eccentricity": 0.004,
+        "inclination_deg": 0.0,
+        "longitude_ascending_node_deg": 0.0,
+        "argument_periapsis_deg": 49.1,
+        "mean_anomaly_deg": 330.9
+      },
+      "visual_defaults": {
+        "radius_multiplier": 24.16,
+        "distance_multiplier": 9.49
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "europa",
+      "type": "moon",
+      "display_name": "Europa",
+      "primary_id": "jupiter",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 1560.8
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_days": 3.551,
+        "axial_tilt_deg": 0.0
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 0.004486026417754354,
+        "orbital_period_days": 3.525463,
+        "eccentricity": 0.009,
+        "inclination_deg": 0.5,
+        "longitude_ascending_node_deg": 184.0,
+        "argument_periapsis_deg": 45.0,
+        "mean_anomaly_deg": 345.4
+      },
+      "visual_defaults": {
+        "radius_multiplier": 24.55,
+        "distance_multiplier": 7.45
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "ganymede",
+      "type": "moon",
+      "display_name": "Ganymede",
+      "primary_id": "jupiter",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 2634.1
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_days": 7.155,
+        "axial_tilt_deg": 0.0
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 0.007155182055676145,
+        "orbital_period_days": 7.155588,
+        "eccentricity": 0.001,
+        "inclination_deg": 0.2,
+        "longitude_ascending_node_deg": 58.5,
+        "argument_periapsis_deg": 198.3,
+        "mean_anomaly_deg": 324.8
+      },
+      "visual_defaults": {
+        "radius_multiplier": 17.18,
+        "distance_multiplier": 6.07
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "callisto",
+      "type": "moon",
+      "display_name": "Callisto",
+      "primary_id": "jupiter",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 2410.3
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_days": 16.689,
+        "axial_tilt_deg": 0.0
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 0.012585072175094802,
+        "orbital_period_days": 16.69044,
+        "eccentricity": 0.007,
+        "inclination_deg": 0.3,
+        "longitude_ascending_node_deg": 309.1,
+        "argument_periapsis_deg": 43.8,
+        "mean_anomaly_deg": 87.4
+      },
+      "visual_defaults": {
+        "radius_multiplier": 17.31,
+        "distance_multiplier": 4.25
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "saturn",
+      "type": "planet",
+      "display_name": "Saturn",
+      "order_from_sun": 6,
+      "primary_id": "sun",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 58232.0
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_hours": 10.656,
+        "axial_tilt_deg": 26.73
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 9.53667594,
+        "orbital_period_days": 10755.698645,
+        "eccentricity": 0.05386179,
+        "inclination_deg": 2.48599187,
+        "longitude_ascending_node_deg": 113.66242448,
+        "argument_periapsis_deg": 338.93645383,
+        "mean_anomaly_deg": 317.35536592
+      },
+      "visual_defaults": {
+        "radius_multiplier": 5.375,
+        "distance_multiplier": 0.146
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "titan",
+      "type": "moon",
+      "display_name": "Titan",
+      "primary_id": "saturn",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 2574.7
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_days": 15.945,
+        "axial_tilt_deg": 0.0
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 0.008167897004699814,
+        "orbital_period_days": 15.945448,
+        "eccentricity": 0.029,
+        "inclination_deg": 0.3,
+        "longitude_ascending_node_deg": 78.6,
+        "argument_periapsis_deg": 78.3,
+        "mean_anomaly_deg": 11.7
+      },
+      "visual_defaults": {
+        "radius_multiplier": 18.89,
+        "distance_multiplier": 5.73
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "enceladus",
+      "type": "moon",
+      "display_name": "Enceladus",
+      "primary_id": "saturn",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 252.1
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_days": 1.370218,
+        "axial_tilt_deg": 0.0
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 0.0015936055699487975,
+        "orbital_period_days": 1.370218,
+        "eccentricity": 0.005,
+        "inclination_deg": 0.0,
+        "longitude_ascending_node_deg": 0.0,
+        "argument_periapsis_deg": 119.5,
+        "mean_anomaly_deg": 57.0
+      },
+      "visual_defaults": {
+        "radius_multiplier": 110.4,
+        "distance_multiplier": 18.91
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "uranus",
+      "type": "planet",
+      "display_name": "Uranus",
+      "order_from_sun": 7,
+      "primary_id": "sun",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 25362.0
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_hours": 17.24,
+        "axial_tilt_deg": 97.77
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 19.18916464,
+        "orbital_period_days": 30687.153001,
+        "eccentricity": 0.04725744,
+        "inclination_deg": 0.77263783,
+        "longitude_ascending_node_deg": 74.01692503,
+        "argument_periapsis_deg": 96.93735127,
+        "mean_anomaly_deg": 142.28382821
+      },
+      "visual_defaults": {
+        "radius_multiplier": 9.6,
+        "distance_multiplier": 0.094
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "neptune",
+      "type": "planet",
+      "display_name": "Neptune",
+      "order_from_sun": 8,
+      "primary_id": "sun",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 24622.0
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_hours": 16.11,
+        "axial_tilt_deg": 28.32
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 30.06992276,
+        "orbital_period_days": 60190.02963,
+        "eccentricity": 0.00859048,
+        "inclination_deg": 1.77004347,
+        "longitude_ascending_node_deg": 131.78422574,
+        "argument_periapsis_deg": 273.18053653,
+        "mean_anomaly_deg": 259.91520804
+      },
+      "visual_defaults": {
+        "radius_multiplier": 9.9,
+        "distance_multiplier": 0.073
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "pluto",
+      "type": "dwarf_planet",
+      "display_name": "Pluto",
+      "order_from_sun": 9,
+      "primary_id": "sun",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 1188.3
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_days": 6.387,
+        "axial_tilt_deg": 119.59
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 39.482,
+        "orbital_period_years": 248.0208,
+        "eccentricity": 0.2488,
+        "inclination_deg": 17.16,
+        "longitude_ascending_node_deg": 110.3,
+        "argument_periapsis_deg": 113.77,
+        "mean_anomaly_deg": 0.0
+      },
+      "visual_defaults": {
+        "radius_multiplier": 46.82,
+        "distance_multiplier": 0.064
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "ceres",
+      "type": "dwarf_planet",
+      "display_name": "Ceres",
+      "primary_id": "sun",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 469.7
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_hours": 9.074,
+        "axial_tilt_deg": 4.0
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 2.7675,
+        "orbital_period_days": 1681.63,
+        "eccentricity": 0.0758,
+        "inclination_deg": 10.59,
+        "longitude_ascending_node_deg": 80.33,
+        "argument_periapsis_deg": 73.6,
+        "mean_anomaly_deg": 0.0
+      },
+      "visual_defaults": {
+        "radius_multiplier": 74.04,
+        "distance_multiplier": 0.289
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    },
+    {
+      "id": "eris",
+      "type": "dwarf_planet",
+      "display_name": "Eris",
+      "primary_id": "sun",
+      "is_reference": false,
+      "truth_physical": {
+        "mean_radius_km": 1163.0
+      },
+      "truth_spin": {
+        "sidereal_rotation_period_hours": 25.9,
+        "axial_tilt_deg": 78.0
+      },
+      "truth_orbit": {
+        "model": "keplerian",
+        "semi_major_axis_AU": 67.864,
+        "orbital_period_years": 557.0,
+        "eccentricity": 0.44,
+        "inclination_deg": 44.04,
+        "longitude_ascending_node_deg": 35.95,
+        "argument_periapsis_deg": 150.98,
+        "mean_anomaly_deg": 0.0
+      },
+      "visual_defaults": {
+        "radius_multiplier": 35.93,
+        "distance_multiplier": 0.051
+      },
+      "spawn": {
+        "initial_angle_deg": 0
+      }
+    }
+  ]
+}

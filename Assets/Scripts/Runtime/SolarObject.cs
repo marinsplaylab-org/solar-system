@@ -30,6 +30,9 @@ namespace Assets.Scripts.Runtime
             public bool ShowSpinAxisLines = true;
             public bool ShowWorldUpLines = true;
             public float RuntimeLineWidthScale = 1.0f;
+
+            // Use per-object visual_defaults multipliers when true.
+            public bool UseVisualDefaults = true;
         }
         #endregion
 
@@ -80,8 +83,8 @@ namespace Assets.Scripts.Runtime
 
         // Physical and visual scale.
         private double radiusKm = 1.0;
-        private double userRadiusMultiplier = 1.0;
-        private double userDistanceMultiplier = 1.0;
+        private double dataRadiusMultiplier = 1.0;
+        private double dataDistanceMultiplier = 1.0;
         private float solarObjectDiameterUnity = 0.1f;
 
         // Spin state.
@@ -165,8 +168,8 @@ namespace Assets.Scripts.Runtime
 
             name = string.IsNullOrWhiteSpace(_data.DisplayName) ? _data.Id : _data.DisplayName;
 
-            userRadiusMultiplier = _data.VisualDefaults?.RadiusMultiplier ?? 1.0;
-            userDistanceMultiplier = _data.VisualDefaults?.DistanceMultiplier ?? 1.0;
+            dataRadiusMultiplier = _data.VisualDefaults?.RadiusMultiplier ?? 1.0;
+            dataDistanceMultiplier = _data.VisualDefaults?.DistanceMultiplier ?? 1.0;
 
             if (isReference)
             {
@@ -290,10 +293,30 @@ namespace Assets.Scripts.Runtime
                 visualContext.ReferenceSolarObjectDiameterUnity *
                 _radiusRatio *
                 visualContext.GlobalRadiusMultiplier *
-                userRadiusMultiplier;
+                GetRadiusMultiplier();
 
             solarObjectDiameterUnity = (float)Math.Max(1e-6, _diameterUnity);
             transform.localScale = Vector3.one * solarObjectDiameterUnity;
+        }
+
+        private double GetRadiusMultiplier()
+        {
+            if (visualContext != null && !visualContext.UseVisualDefaults)
+            {
+                return 1.0;
+            }
+
+            return dataRadiusMultiplier;
+        }
+
+        private double GetDistanceMultiplier()
+        {
+            if (visualContext != null && !visualContext.UseVisualDefaults)
+            {
+                return 1.0;
+            }
+
+            return dataDistanceMultiplier;
         }
 
         /// <summary>
@@ -428,7 +451,7 @@ namespace Assets.Scripts.Runtime
                 return Vector3.zero;
             }
 
-            double _distanceMultiplier = visualContext.GlobalDistanceMultiplier * userDistanceMultiplier;
+            double _distanceMultiplier = visualContext.GlobalDistanceMultiplier * GetDistanceMultiplier();
 
             double _aUnity =
                 (semiMajorAxisKm / Math.Max(1e-9, visualContext.DistanceKmPerUnityUnit)) * _distanceMultiplier;
