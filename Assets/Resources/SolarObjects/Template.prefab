@@ -67,7 +67,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e126ae0d13c0845b29cb7893519ea562, type: 2}
+  - {fileID: 2100000, guid: 3b6ababd654b445138fac1462a55f41b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -103,10 +103,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 423a49e28d77541f09eaa1c12f9cad3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Runtime.SolarObject
-  drawOrbitRuntime: 1
-  drawAxisRuntime: 1
-  drawWorldUpRuntime: 1
-  drawSpinDirectionRuntime: 1
+  showOrbitLinesLocal: 1
+  showSpinAxisLinesLocal: 1
+  showWorldUpLinesLocal: 1
+  showSpinDirectionLinesLocal: 1
   orbitLineWidth: 0.06
   axisLineWidth: 0.03
   spinDirectionLineWidth: 0.02
@@ -124,32 +124,32 @@ MonoBehaviour:
   spinDirectionArrowHeadLengthMultiplier: 0.2
   spinDirectionArrowHeadAngleDeg: 25
   scaleAxisLinesByCameraDistance: 1
-  axisLineDistanceReference: 1.5
+  axisLineDistanceScaleReference: 1.5
   axisLineDistanceMinScale: 0.15
   axisLineDistanceMaxScale: 6
   axisLineDistanceExponent: 1.35
-  axisLineSizeReference: 0.15
+  axisLineSizeScaleReference: 0.15
   axisLineSizeMinScale: 1.3
   axisLineSizeMaxScale: 2.2
-  axisLineSizeWidthMaxScale: 1.6
+  axisLineSizeMaxWidthScale: 1.6
   axisLineSizeStarMaxScale: 1.4
-  axisLineLengthMultiplier: 0.5
-  axisLineThicknessMultiplier: 1.6
-  axisLineStarMaxLengthMultiplier: 0.6
-  axisLineSmallBodyDiameterThreshold: 0.25
-  axisLineSmallBodyLengthScale: 1.6
+  axisLineLengthScale: 0.5
+  axisLineThicknessScale: 1.6
+  axisLineStarLengthMaxScale: 0.6
+  axisLineSmallBodyDiameterThresholdUnity: 0.25
+  axisLineSmallBodyLengthScaleMultiplier: 1.6
   scaleOrbitLinesByCameraDistance: 1
-  orbitLineDistanceReference: 6
+  orbitLineDistanceScaleReference: 6
   orbitLineDistanceMinScale: 0.12
   orbitLineDistanceMaxScale: 20
   orbitLineDistanceExponent: 1.6
-  orbitLineDistanceExponentNear: 0.85
+  orbitLineNearDistanceExponent: 0.85
   orbitLineDistanceScaleBoost: 1.4
-  orbitLineDistanceNearExponentMultiplier: 0.7
-  orbitLineDistanceMaxScaleMultiplier: 1.4
-  hypotheticalOrbitLineFocusDistance: 10
-  hypotheticalOrbitLineFocusScaleMultiplier: 3
-  hypotheticalOrbitLineFarScale: 30
+  orbitLineNearExponentMultiplier: 0.7
+  orbitLineDistanceMaxScaleBoost: 1.4
+  hypotheticalOrbitFocusDistance: 10
+  hypotheticalOrbitFocusScale: 3
+  hypotheticalOrbitFarScale: 30
   enableTidalLock: 1
   tidalLockOnlyForMoons: 1
   tidalLockPeriodTolerance: 0.02
