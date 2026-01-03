@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Assets.Scripts.Helpers.Debugging;
 using Assets.Scripts.Runtime;
 using UnityEngine;
@@ -25,7 +26,7 @@ namespace Assets.Scripts.Cameras
                 return;
             }
 
-            if (!TryGetModeTarget(currentMode, out Transform _target))
+            if (!TryGetModeTarget(currentMode, out Transform? _target))
             {
                 return;
             }
@@ -43,7 +44,7 @@ namespace Assets.Scripts.Cameras
                 return;
             }
 
-            if (!TryGetModeTarget(currentMode, out Transform _target))
+            if (!TryGetModeTarget(currentMode, out Transform? _target))
             {
                 return;
             }
@@ -94,7 +95,7 @@ namespace Assets.Scripts.Cameras
             return Quaternion.LookRotation(_dir.normalized, Vector3.up);
         }
 
-        private bool TryGetModeTarget(CameraMode _mode, out Transform _target)
+        private bool TryGetModeTarget(CameraMode _mode, [NotNullWhen(true)] out Transform? _target)
         {
             _target = _mode == CameraMode.Focus ? focusTarget : overviewTarget;
             return _target != null;
@@ -146,7 +147,7 @@ namespace Assets.Scripts.Cameras
                 return;
             }
 
-            if (!TryGetModeTarget(_mode, out Transform _target))
+            if (!TryGetModeTarget(_mode, out Transform? _target))
             {
                 return;
             }
@@ -192,7 +193,7 @@ namespace Assets.Scripts.Cameras
                 return;
             }
 
-            if (!TryGetModeTarget(transitionMode, out Transform _target))
+            if (!TryGetModeTarget(transitionMode, out Transform? _target))
             {
                 CancelTransition();
                 return;
@@ -254,7 +255,7 @@ namespace Assets.Scripts.Cameras
                 return;
             }
 
-            if (!TryGetModeTarget(transitionMode, out Transform _target))
+            if (!TryGetModeTarget(transitionMode, out Transform? _target))
             {
                 CancelTransition();
                 return;

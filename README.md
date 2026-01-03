@@ -19,6 +19,16 @@ This project focuses on:
 
 ---
 
+## Style Quick Reference
+- Rules apply to humans and automation.
+- Allman braces and `{}` for all control statements.
+- Prefix locals/params with `_`; no `_` for fields/properties; use descriptive names.
+- Comments explain what and why; add example when useful.
+- Avoid hardcoding; prefer JSON, serialized fields, constants, or inspector values; keep modular/customizable.
+- Use `HelpLogs`, keep namespaces aligned, use `#region`, partial files use underscores, update README/AGENTS/JSON/prefabs/scenes on contract changes.
+
+---
+
 ## Simulation Model
 ### Data vs Visual
 The simulator uses a **real-data baseline** (radius, rotation period, orbit period, semi-major axis, etc.) and then applies **visual multipliers** per solar object:
@@ -253,14 +263,20 @@ Global toggles for orbit paths, spin axis, and world-up lines are available in t
 ---
 
 ## Code Guidelines
+- Rules apply to humans and automation.
+- Allman braces for all blocks.
 - All control statements use `{}` even for single lines, including `if`, `else`, `for`, `foreach`, `while`, and `do`.
 - Local variables and parameters use `_` prefix, while non-local fields/properties do not.
-- Prefer short, clear comments only when the logic is not obvious.
+- Descriptive names. Long names ok.
+- Comments explain what and why. Add example when useful.
+- Avoid hardcoding. Use JSON, serialized fields, constants, or inspector values.
+- Prefer modular and customizable settings.
 - Use `HelpLogs` for logs, warnings, and errors.
 - Keep namespaces aligned with folder structure (e.g. `Assets.Scripts.Runtime`).
 - Avoid obsolete APIs and keep code current with the project dependencies.
 - Use `#region` blocks to group related fields and methods.
 - Partial class files use underscores, e.g. `SolarSystemCamera_PublicAPI.cs`.
+- Update related files when contracts change: README, AGENTS, JSON, prefabs, scenes.
 
 ---
 
