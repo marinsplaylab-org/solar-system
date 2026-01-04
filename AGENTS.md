@@ -3,6 +3,7 @@
 ## Purpose
 - Use for all work in this repo.
 - Keep project goals, constraints, and style.
+- Keep `README.md` and `CREDITS.md` aligned with current project contracts.
 
 ## Project Summary
 - Unity 6000.3+ with URP.

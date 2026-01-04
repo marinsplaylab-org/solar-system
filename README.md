@@ -23,6 +23,8 @@ Disclaimer: Visualization only. Not for scientific analysis or ephemeris accurac
 - `SolarObject` handles orbit, spin, and runtime lines per object
 - `SolarSystemJsonLoader` loads and validates JSON
 - `SolarSystemCamera` manages focus and overview controls
+- `AGENTS.md` (project rules and automation guidance)
+- `CREDITS.md` (third-party asset attributions)
 
 ## Quick Start
 1. Install `com.unity.nuget.newtonsoft-json`.
