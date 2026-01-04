@@ -117,9 +117,19 @@ namespace Assets.Scripts.Loading
 
                 if (!_o.IsReference)
                 {
-                    if (string.IsNullOrWhiteSpace(_o.PrimaryId))
+                    string _primaryId = _o.PrimaryId ?? string.Empty;
+                    if (string.IsNullOrWhiteSpace(_primaryId))
                     {
                         HelpLogs.Error("JsonLoader", $"'{_o.Id}' missing primary_id.");
+                        return null;
+                    }
+
+                    if (!_result.ById.ContainsKey(_primaryId))
+                    {
+                        HelpLogs.Error(
+                            "JsonLoader",
+                            $"'{_o.Id}' primary_id '{_primaryId}' not found in dataset."
+                        );
                         return null;
                     }
 
@@ -177,7 +187,7 @@ namespace Assets.Scripts.Loading
                 {
                     HelpLogs.Error(
                         "JsonLoader",
-                        $"'{_o.Id}' invalid camera_focus_profile '{_focusProfile}'."
+                        $"'{_o.Id}'camera_focus_profile '{_focusProfile}' is incorrect."
                     );
                     return null;
                 }

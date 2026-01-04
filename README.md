@@ -156,14 +156,13 @@ Press **Play**.
 
 ## Runtime Controls (Optional)
 
-`SolarSystemSimulator` can auto-bind buttons and labels for live tuning at runtime.
-Turn this on via `enableRuntimeControls` in the Inspector.
+`SolarSystemSimulator` auto-binds buttons and labels for live tuning at runtime.
+No Inspector toggle.
 
 The runtime GUI scans **all scene canvases** and looks for named widgets.
 Add `Gui_RuntimeControlEvents` to the Canvas so button presses are applied via events.
 
-Optional:
-- Add `HypotheticalToggleButton` to show/hide hypothetical entries (objects with `is_hypothetical: true` in the JSON).
+Hypothetical objects (Planet X) always render.
 
 Text labels (`TextMeshProUGUI`):
 - `TimeScaleValueText`
@@ -175,19 +174,6 @@ Buttons (`UnityEngine.UI.Button`):
 - `TimeScalePlusButton`
 - `RealismMinusButton`
 - `RealismPlusButton`
-- `CameraOrbitUpButton`
-- `CameraOrbitDownButton`
-- `CameraOrbitLeftButton`
-- `CameraOrbitRightButton`
-- `CameraZoomInButton`
-- `CameraZoomOutButton`
-
-Toggles (`UnityEngine.UI.Toggle`):
-- `HypotheticalToggleButton`
-- `OrbitLinesToggle`
-- `SpinAxisToggle`
-- `WorldUpToggle`
-- `SpinDirectionToggle`
 
 Control levels (names and values):
 
@@ -201,23 +187,18 @@ Realism blends between the Simulation visuals and raw JSON values
 - At 1.00, global multipliers use `global_visual_defaults`, per-object `visual_defaults` are neutralized, and Simulation scaling fades out
 - Orbit segments and runtime line width scaling interpolate between the Simulation target and the dataset default
 - The buttons step realism by `realismStep` (default 0.05) in code
+- Sun light realism ramp is scaled by `sunLightRealismStepMultiplier` (default 1.5)
+- Sun light intensity uses exponential ease-out via `sunLightRealismIntensityExponent` (default 6.0)
+- Orbit lines are always visible and fade to alpha 15 when focused and close
 
 The JSON dataset stays the same, only the visualization scaling changes
 
 ---
 
 ## Camera Controls
-The camera is a custom runtime rig. A GUI grid is used to focus on solar objects.
-
-Required scene objects (names must match):
-- Grid layout: `SolarObjects_View_Interaction_GridLayoutGroup`
-- Focus button template (inactive): `Focus_SolarObject_Button`
-- Overview button: `View_SolarSystem_Overview_Button`
-- Button TMP child name: `Text`
-
-Add these components to the scene:
-- `SolarSystemCamera` (camera logic)
-- `Gui_SolarObjectGrid` (builds focus buttons at runtime)
+The camera is a custom runtime rig.
+Click/tap to select. Drag to orbit the current target. Mouse wheel zooms. Pinch zooms.
+Double-click/tap a focused object to toggle spin axis + world-up + spin-direction lines (all other objects stay off).
 
 Realism camera behavior:
 - As realism increases, overview zoom range and zoom speed increase
@@ -231,11 +212,11 @@ Orbit paths and axis lines are rendered with **LineRenderer** components at runt
 These lines are children of each `SolarObject` and show in both the editor and builds.
 
 Controls live on the `SolarObject` component:
-- Toggle orbit lines / axis lines
 - Adjust line widths and colors
 - Widths auto-scale based on global distance/radius multipliers and camera distance
 
-Global toggles for orbit paths, spin axis, and world-up lines are available in the runtime GUI.
+Spin axis, world-up, and spin-direction lines are toggled per focused object with double-click/tap.
+Orbit lines always render and become very transparent when zoomed in close.
 
 ---
 

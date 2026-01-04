@@ -30,6 +30,13 @@ namespace Assets.Scripts.Runtime
             public bool ShowWorldUpLines = true;
             public bool ShowSpinDirectionLines = true;
             public float RuntimeLineWidthScale = 1.0f;
+            public float AxisLineThicknessMultiplier = 1.0f;
+            public float AxisLineStarLengthMultiplier = 1.0f;
+            public float AxisLineNonStarLengthMultiplier = 1.0f;
+
+            public string FocusedSolarObjectId = string.Empty;
+            public float FocusedOrbitLineNearAlpha = 15.0f;
+            public float FocusedOrbitLineNearScaleThreshold = 1.0f;
 
             // Blend per-object visual_defaults multipliers (0 = off, 1 = full).
             public float VisualDefaultsBlend = 1.0f;

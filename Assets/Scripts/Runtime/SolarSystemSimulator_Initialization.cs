@@ -46,6 +46,15 @@ namespace Assets.Scripts.Runtime
             visualContext.SimulationInnerDwarfDistanceScale = simulationInnerDwarfDistanceScale;
             visualContext.SimulationMoonOrbitDistanceScale = simulationMoonOrbitDistanceScale;
             visualContext.AlignMoonOrbitsToPrimaryAxialTilt = alignMoonOrbitsToPrimaryAxialTilt;
+            visualContext.ShowOrbitLines = true;
+            visualContext.ShowSpinAxisLines = true;
+            visualContext.ShowWorldUpLines = true;
+            visualContext.ShowSpinDirectionLines = true;
+            visualContext.FocusedOrbitLineNearAlpha = focusedOrbitLineNearAlpha;
+            visualContext.FocusedOrbitLineNearScaleThreshold = focusedOrbitLineNearScaleThreshold;
+            visualContext.AxisLineThicknessMultiplier = axisLineThicknessMultiplier;
+            visualContext.AxisLineStarLengthMultiplier = axisLineStarLengthMultiplier;
+            visualContext.AxisLineNonStarLengthMultiplier = axisLineNonStarLengthMultiplier;
 
             if (_db.ById.TryGetValue("sun", out SolarObjectData _sunData))
             {
@@ -73,13 +82,37 @@ namespace Assets.Scripts.Runtime
 
             InitializeAllTwoPass(_db);
             RebuildOrderedSolarObjects(_db);
-            ApplyHypotheticalVisibility();
+            EnsureHypotheticalObjectsActive();
             LogSpawnedSolarObjects(_db);
             ApplySunLightRealism();
 
             for (int _i = 0; _i < solarObjectsOrdered.Count; _i++)
             {
-                solarObjectsOrdered[_i].Simulate(simulationTimeSeconds);
+                SolarObject _object = solarObjectsOrdered[_i];
+                _object.SetOrbitLinesEnabled(true);
+                _object.Simulate(simulationTimeSeconds);
+            }
+
+            SetFocusedSolarObject(null);
+        }
+
+        /// <summary>
+        /// Ensure hypothetical objects (Planet X) stay active.
+        /// </summary>
+        private void EnsureHypotheticalObjectsActive()
+        {
+            foreach (KeyValuePair<string, SolarObject> _pair in solarObjectsById)
+            {
+                SolarObject _object = _pair.Value;
+                if (!_object.IsHypothetical)
+                {
+                    continue;
+                }
+
+                if (!_object.gameObject.activeSelf)
+                {
+                    _object.gameObject.SetActive(true);
+                }
             }
         }
 

@@ -51,18 +51,20 @@ namespace Assets.Scripts.Cameras
 
             Vector3 _desiredPosition = GetDesiredCameraPosition(currentMode, _target);
             Vector3 _currentPosition = mainCamera.transform.position;
-            Vector3 _newPosition = SmoothPosition(_currentPosition, _desiredPosition, _dt);
+            bool _useOrbitInputSmooth = IsOrbitInputSmoothActive();
+            Vector3 _newPosition = SmoothPosition(_currentPosition, _desiredPosition, _dt, _useOrbitInputSmooth);
 
             Quaternion _desiredRotation = GetLookRotation(_target.position, _newPosition);
             Quaternion _currentRotation = mainCamera.transform.rotation;
-            Quaternion _newRotation = SmoothRotation(_currentRotation, _desiredRotation, _dt);
+            Quaternion _newRotation = SmoothRotation(_currentRotation, _desiredRotation, _dt, _useOrbitInputSmooth);
 
             mainCamera.transform.SetPositionAndRotation(_newPosition, _newRotation);
         }
 
-        private Vector3 SmoothPosition(Vector3 _current, Vector3 _target, float _dt)
+        private Vector3 SmoothPosition(Vector3 _current, Vector3 _target, float _dt, bool _useOrbitInputSmooth)
         {
-            float _smoothTime = GetSmoothSeconds(positionSmoothSeconds);
+            float _baseSmooth = _useOrbitInputSmooth ? orbitInputPositionSmoothSeconds : positionSmoothSeconds;
+            float _smoothTime = GetSmoothSeconds(_baseSmooth);
             if (_smoothTime <= 0f)
             {
                 positionVelocity = Vector3.zero;
@@ -72,9 +74,10 @@ namespace Assets.Scripts.Cameras
             return Vector3.SmoothDamp(_current, _target, ref positionVelocity, _smoothTime, Mathf.Infinity, _dt);
         }
 
-        private Quaternion SmoothRotation(Quaternion _current, Quaternion _target, float _dt)
+        private Quaternion SmoothRotation(Quaternion _current, Quaternion _target, float _dt, bool _useOrbitInputSmooth)
         {
-            float _smoothTime = GetSmoothSeconds(rotationSmoothSeconds);
+            float _baseSmooth = _useOrbitInputSmooth ? orbitInputRotationSmoothSeconds : rotationSmoothSeconds;
+            float _smoothTime = GetSmoothSeconds(_baseSmooth);
             if (_smoothTime <= 0f)
             {
                 return _target;
@@ -104,14 +107,9 @@ namespace Assets.Scripts.Cameras
         private Vector3 GetDesiredCameraPosition(CameraMode _mode, Transform _target)
         {
             float _distance = _mode == CameraMode.Focus ? GetFocusDistanceForCurrentTarget() : GetOverviewDistance();
-            float _radius = GetOrbitRadiusFromDistance(
-                _distance,
-                _mode == CameraMode.Focus ? focusOrbitMaxOffset : overviewOrbitMaxOffset
-            );
-
             float _yaw = _mode == CameraMode.Focus ? focusYaw : overviewYaw;
             float _pitch = _mode == CameraMode.Focus ? focusPitch : overviewPitch;
-            Vector3 _offset = GetOrbitOffset(_radius, _yaw, _pitch);
+            Vector3 _offset = GetOrbitOffset(_distance, _yaw, _pitch);
 
             return _target.position + _offset;
         }
@@ -299,6 +297,17 @@ namespace Assets.Scripts.Cameras
             }
 
             return _smooth;
+        }
+
+        private bool IsOrbitInputSmoothActive()
+        {
+            if (orbitInputActiveHoldSeconds <= 0f)
+            {
+                return false;
+            }
+
+            float _elapsed = Time.unscaledTime - lastOrbitInputTime;
+            return _elapsed <= orbitInputActiveHoldSeconds;
         }
 
         private float GetFocusDistanceForCurrentTarget()
@@ -530,6 +539,24 @@ namespace Assets.Scripts.Cameras
             }
 
             ApplyOverviewDistance();
+        }
+
+        private void ApplyOverviewStartHeightOffset(float _distance)
+        {
+            if (Mathf.Approximately(overviewStartHeightOffset, 0f))
+            {
+                return;
+            }
+
+            if (_distance <= 0.0001f)
+            {
+                return;
+            }
+
+            float _height = Mathf.Clamp(overviewStartHeightOffset, -_distance, _distance);
+            float _pitchRad = Mathf.Asin(_height / Mathf.Max(0.0001f, _distance));
+            float _pitchDeg = Mathf.Rad2Deg * _pitchRad;
+            overviewPitch = Mathf.Clamp(_pitchDeg, -orbitMaxPitchDegrees, orbitMaxPitchDegrees);
         }
         #endregion
     }

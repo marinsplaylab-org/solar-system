@@ -107,6 +107,32 @@ namespace Assets.Scripts.Runtime
         {
             lineStylesDirty = true;
         }
+
+        /// <summary>
+        /// Enable or disable spin-axis, world-up, and spin-direction lines for this object.
+        /// </summary>
+        public void SetAxisLinesEnabled(bool _enabled)
+        {
+            showSpinAxisLinesLocal = _enabled;
+            showWorldUpLinesLocal = _enabled;
+            showSpinDirectionLinesLocal = _enabled;
+            lineStylesDirty = true;
+        }
+
+        /// <summary>
+        /// True when axis, world-up, or spin-direction lines are enabled locally.
+        /// </summary>
+        public bool AreAxisLinesEnabled =>
+            showSpinAxisLinesLocal || showWorldUpLinesLocal || showSpinDirectionLinesLocal;
+
+        /// <summary>
+        /// Enable or disable orbit line rendering for this object.
+        /// </summary>
+        public void SetOrbitLinesEnabled(bool _enabled)
+        {
+            showOrbitLinesLocal = _enabled;
+            lineStylesDirty = true;
+        }
         #endregion
     }
 }

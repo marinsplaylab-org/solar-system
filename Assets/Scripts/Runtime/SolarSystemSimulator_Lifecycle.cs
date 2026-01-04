@@ -18,7 +18,6 @@ namespace Assets.Scripts.Runtime
             Application.targetFrameRate = 60;
 
             realismLevel = Mathf.Clamp01(realismLevel);
-
             activeDatabase = SolarSystemJsonLoader.LoadOrLog(resourcesJsonPathWithoutExtension);
             if (activeDatabase == null)
             {
@@ -33,7 +32,6 @@ namespace Assets.Scripts.Runtime
             LoadPrefabsFromResources();
 
             ApplyDatabase(activeDatabase, true);
-            ApplyHypotheticalVisibility();
             SolarObjectsReady?.Invoke(solarObjectsOrdered);
 
             HelpLogs.Log("Simulator", $"Ready. Objects spawned: {solarObjectsById.Count}");
@@ -44,18 +42,8 @@ namespace Assets.Scripts.Runtime
         /// </summary>
         private void OnEnable()
         {
-            if (!enableRuntimeControls)
-            {
-                return;
-            }
-
             Gui.TimeScaleStepRequested += HandleTimeScaleStepRequested;
             Gui.RealismStepRequested += HandleRealismStepRequested;
-            Gui.OrbitLinesToggled += HandleOrbitLinesToggled;
-            Gui.SpinAxisToggled += HandleSpinAxisToggled;
-            Gui.WorldUpToggled += HandleWorldUpToggled;
-            Gui.SpinDirectionToggled += HandleSpinDirectionToggled;
-            Gui.HypotheticalToggleChanged += HandleHypotheticalToggleChanged;
         }
 
         /// <summary>
@@ -63,11 +51,6 @@ namespace Assets.Scripts.Runtime
         /// </summary>
         private void Start()
         {
-            if (!enableRuntimeControls)
-            {
-                return;
-            }
-
             Gui.Initialize();
             SetupRuntimeGui();
             runtimeControlsInitialized = true;
@@ -75,7 +58,6 @@ namespace Assets.Scripts.Runtime
             UpdateAppVersionText();
             ApplyRealismLevel(realismLevel, true);
             UpdateTimeScaleText();
-            UpdateHypotheticalToggleText();
         }
 
         /// <summary>
@@ -84,18 +66,8 @@ namespace Assets.Scripts.Runtime
         /// </summary>
         private void OnDestroy()
         {
-            if (!enableRuntimeControls)
-            {
-                return;
-            }
-
             Gui.TimeScaleStepRequested -= HandleTimeScaleStepRequested;
             Gui.RealismStepRequested -= HandleRealismStepRequested;
-            Gui.OrbitLinesToggled -= HandleOrbitLinesToggled;
-            Gui.SpinAxisToggled -= HandleSpinAxisToggled;
-            Gui.WorldUpToggled -= HandleWorldUpToggled;
-            Gui.SpinDirectionToggled -= HandleSpinDirectionToggled;
-            Gui.HypotheticalToggleChanged -= HandleHypotheticalToggleChanged;
 
             Gui.UnInitialize();
         }
@@ -119,7 +91,7 @@ namespace Assets.Scripts.Runtime
                 _object.Simulate(simulationTimeSeconds);
             }
 
-            if (enableRuntimeControls && runtimeControlsInitialized)
+            if (runtimeControlsInitialized)
             {
                 timeLabelRefreshTimer += Time.deltaTime;
                 if (timeLabelRefreshTimer >= 1.0f)

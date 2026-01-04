@@ -50,6 +50,15 @@ namespace Assets.Scripts.Cameras
         [Tooltip("Smooth time in seconds for camera rotation. Higher = slower. Example: 0.2")]
         [Range(0f, 5f)]
         [SerializeField] private float rotationSmoothSeconds = 0.3f;
+        [Tooltip("Smooth time in seconds for camera position while orbit input is active. Lower = tighter follow. Example: 0.08")]
+        [Range(0f, 5f)]
+        [SerializeField] private float orbitInputPositionSmoothSeconds = 0.1f;
+        [Tooltip("Smooth time in seconds for camera rotation while orbit input is active. Lower = tighter aim. Example: 0.05")]
+        [Range(0f, 5f)]
+        [SerializeField] private float orbitInputRotationSmoothSeconds = 0.07f;
+        [Tooltip("Seconds to keep orbit input smoothing active after the last orbit step. Example: 0.12")]
+        [Range(0f, 1f)]
+        [SerializeField] private float orbitInputActiveHoldSeconds = 0.15f;
 
         [Header("Transitions")]
         [Tooltip("Seconds per degree during alignment. Higher = slower rotation. Example: 0.01")]
@@ -119,9 +128,9 @@ namespace Assets.Scripts.Cameras
         [SerializeField] private FocusZoomRange starZoomRange = new FocusZoomRange
         {
             MinSimulation = 1.5f,
-            MaxSimulation = 3.0f,
+            MaxSimulation = 12.0f,
             MinRealistic = 2.5f,
-            MaxRealistic = 3.0f,
+            MaxRealistic = 12.0f,
         };
 
         [Header("Focus Zoom Safety")]
@@ -138,7 +147,7 @@ namespace Assets.Scripts.Cameras
         [SerializeField] private float overviewZoomMaxDistance = 120f;
         [Tooltip("Overview default distance. Higher = start farther out. Example: 5")]
         [Range(0.1f, 500f)]
-        [SerializeField] private float overviewDefaultDistance = 5f;
+        [SerializeField] private float overviewDefaultDistance = 10f;
         [Tooltip("Overview zoom speed multiplier. Higher = faster zoom steps. Example: 4")]
         [Range(1f, 50f)]
         [SerializeField] private float overviewZoomSpeedScale = 4f;
@@ -154,6 +163,11 @@ namespace Assets.Scripts.Cameras
         [Tooltip("Normalized zoom fraction used when selecting a new focus target. 0 = min, 1 = max. Example: 0.15")]
         [Range(0f, 1f)]
         [SerializeField] private float focusSelectZoomFraction = 0.15f;
+
+        [Header("Overview Start")]
+        [Tooltip("Overview start height offset from the target in world units. Example: 2")]
+        [Range(-100f, 100f)]
+        [SerializeField] private float overviewStartHeightOffset = 2f;
 
         [Header("Overview Zoom Acceleration")]
         [Tooltip("Normalized distance where overview zoom acceleration begins. Lower = speed ramps earlier. Example: 0.4")]
@@ -232,6 +246,7 @@ namespace Assets.Scripts.Cameras
         private float overviewZoomNormalized = 0f;
 
         private Vector3 positionVelocity = Vector3.zero;
+        private float lastOrbitInputTime = -100f;
 
         private bool isTransitioning = false;
         private CameraMode transitionMode = CameraMode.Overview;

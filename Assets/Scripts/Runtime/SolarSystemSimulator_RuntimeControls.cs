@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Guis;
 using Assets.Scripts.Helpers.Debugging;
-using TMPro;
 using UnityEngine;
 
 namespace Assets.Scripts.Runtime
@@ -95,51 +94,20 @@ namespace Assets.Scripts.Runtime
         }
 
         /// <summary>
-        /// Initialize runtime UI state and sync toggle defaults.
+        /// Initialize runtime UI state and sync defaults.
         /// </summary>
         private void SetupRuntimeGui()
         {
-            if (!enableRuntimeControls)
-            {
-                return;
-            }
-
             // Discrete control levels that map to curated values.
             timeScaleLevels[0] = timeScale;
             timeScaleLevels[1] = 1_000.0f;
             timeScaleLevels[2] = 10_000.0f;
-            timeScaleLevels[3] = 1_000_000.0f;
+            timeScaleLevels[3] = 200_000.0f;
 
             timeScaleLevelIndex = 1;
             timeScale = timeScaleLevels[timeScaleLevelIndex];
             realismLevel = Mathf.Clamp01(realismLevel);
-
-            if (Gui.OrbitLinesToggle != null)
-            {
-                visualContext.ShowOrbitLines = Gui.OrbitLinesToggle.isOn;
-            }
-
-            if (Gui.SpinAxisToggle != null)
-            {
-                visualContext.ShowSpinAxisLines = Gui.SpinAxisToggle.isOn;
-            }
-
-            if (Gui.WorldUpToggle != null)
-            {
-                visualContext.ShowWorldUpLines = Gui.WorldUpToggle.isOn;
-            }
-
-            if (Gui.SpinDirectionToggle != null)
-            {
-                visualContext.ShowSpinDirectionLines = Gui.SpinDirectionToggle.isOn;
-            }
-
-            if (Gui.HypotheticalToggle != null)
-            {
-                showHypotheticalObjects = Gui.HypotheticalToggle.isOn;
-                ApplyHypotheticalVisibility();
-                SolarObjectsReady?.Invoke(solarObjectsOrdered);
-            }
+            visualContext.ShowSpinDirectionLines = true;
         }
 
         /// <summary>
@@ -201,83 +169,6 @@ namespace Assets.Scripts.Runtime
         }
 
         /// <summary>
-        /// Toggle orbit line rendering for all objects.
-        /// </summary>
-        private void HandleOrbitLinesToggled(bool _enabled)
-        {
-            if (!runtimeControlsInitialized)
-            {
-                return;
-            }
-
-            visualContext.ShowOrbitLines = _enabled;
-            MarkAllLineStylesDirty();
-        }
-
-        /// <summary>
-        /// Toggle spin axis line rendering for all objects.
-        /// </summary>
-        private void HandleSpinAxisToggled(bool _enabled)
-        {
-            if (!runtimeControlsInitialized)
-            {
-                return;
-            }
-
-            visualContext.ShowSpinAxisLines = _enabled;
-            MarkAllLineStylesDirty();
-        }
-
-        /// <summary>
-        /// Toggle world-up line rendering for all objects.
-        /// </summary>
-        private void HandleWorldUpToggled(bool _enabled)
-        {
-            if (!runtimeControlsInitialized)
-            {
-                return;
-            }
-
-            visualContext.ShowWorldUpLines = _enabled;
-            MarkAllLineStylesDirty();
-        }
-
-        /// <summary>
-        /// Toggle spin-direction arc rendering for all objects.
-        /// </summary>
-        private void HandleSpinDirectionToggled(bool _enabled)
-        {
-            if (!runtimeControlsInitialized)
-            {
-                return;
-            }
-
-            visualContext.ShowSpinDirectionLines = _enabled;
-            MarkAllLineStylesDirty();
-        }
-
-        /// <summary>
-        /// Handle the Planet X toggle and update visibility.
-        /// </summary>
-        private void HandleHypotheticalToggleChanged(bool _enabled)
-        {
-            if (!runtimeControlsInitialized)
-            {
-                return;
-            }
-
-            if (showHypotheticalObjects == _enabled)
-            {
-                return;
-            }
-
-            showHypotheticalObjects = _enabled;
-            ApplyHypotheticalVisibility();
-            UpdateHypotheticalToggleText();
-            SolarObjectsReady?.Invoke(solarObjectsOrdered);
-        }
-
-        /// <summary>
         /// Re-apply visual scaling to all objects.
         /// </summary>
         private void RefreshAllVisuals()
@@ -300,21 +191,48 @@ namespace Assets.Scripts.Runtime
         }
 
         /// <summary>
-        /// Activate or hide hypothetical solar objects in the scene.
+        /// Assign the focused solar object and disable axis/world-up/spin-direction lines for all others.
         /// </summary>
-        private void ApplyHypotheticalVisibility()
+        public void SetFocusedSolarObject(SolarObject? _solarObject)
         {
-            foreach (KeyValuePair<string, SolarObject> _pair in solarObjectsById)
-            {
-                SolarObject _object = _pair.Value;
-                if (!_object.IsHypothetical)
-                {
-                    continue;
-                }
+            focusedSolarObject = _solarObject;
+            visualContext.FocusedSolarObjectId = _solarObject != null ? _solarObject.Id : string.Empty;
 
-                if (_object.gameObject.activeSelf != showHypotheticalObjects)
+            for (int _i = 0; _i < solarObjectsOrdered.Count; _i++)
+            {
+                SolarObject _object = solarObjectsOrdered[_i];
+                bool _isFocus = _solarObject != null && ReferenceEquals(_object, _solarObject);
+                if (!_isFocus)
                 {
-                    _object.gameObject.SetActive(showHypotheticalObjects);
+                    _object.SetAxisLinesEnabled(false);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Toggle axis/world-up/spin-direction lines for the focused object and disable them for all others.
+        /// </summary>
+        public void ToggleFocusAxisLines(SolarObject _solarObject)
+        {
+            if (_solarObject == null)
+            {
+                return;
+            }
+
+            focusedSolarObject = _solarObject;
+            visualContext.FocusedSolarObjectId = _solarObject.Id;
+
+            bool _enable = !_solarObject.AreAxisLinesEnabled;
+            for (int _i = 0; _i < solarObjectsOrdered.Count; _i++)
+            {
+                SolarObject _object = solarObjectsOrdered[_i];
+                if (ReferenceEquals(_object, _solarObject))
+                {
+                    _object.SetAxisLinesEnabled(_enable);
+                }
+                else
+                {
+                    _object.SetAxisLinesEnabled(false);
                 }
             }
         }
@@ -396,26 +314,6 @@ namespace Assets.Scripts.Runtime
         }
 
         /// <summary>
-        /// Update the Planet X toggle label text.
-        /// </summary>
-        private void UpdateHypotheticalToggleText()
-        {
-            TextMeshProUGUI? _text = null;
-            if (Gui.HypotheticalToggle != null)
-            {
-                Gui.HypotheticalToggle.SetIsOnWithoutNotify(showHypotheticalObjects);
-                _text = Gui.HypotheticalToggle.GetComponentInChildren<TextMeshProUGUI>(true);
-            }
-
-            if (_text == null)
-            {
-                return;
-            }
-
-            _text.text = showHypotheticalObjects ? "Planet X: On" : "Planet X: Off";
-        }
-
-        /// <summary>
         /// Apply a realism blend and optionally refresh visuals.
         /// </summary>
         private void ApplyRealismLevel(float _level, bool _refreshVisuals)
@@ -464,11 +362,13 @@ namespace Assets.Scripts.Runtime
                 HelpLogs.Warn("Simulator", "Sun light is not a Point light. Check the Sun prefab.");
             }
 
-            float _realism = RealismLevel01;
+            float _stepMultiplier = Mathf.Max(0.01f, sunLightRealismStepMultiplier);
+            float _realism = Mathf.Clamp01(RealismLevel01 * _stepMultiplier);
+            float _intensityT = ApplyExponentialEaseOut01(_realism, sunLightRealismIntensityExponent);
             float _targetIntensity = LerpLogOrLinear(
                 sunLightSimulationIntensity,
                 sunLightRealisticIntensity,
-                _realism
+                _intensityT
             );
             float _targetRange = LerpLogOrLinear(
                 sunLightSimulationRange,
@@ -494,6 +394,19 @@ namespace Assets.Scripts.Runtime
             _sunLight.intensity = _targetIntensity;
             _sunLight.range = _targetRange;
             _sunLight.bounceIntensity = _targetIndirect;
+        }
+
+        private static float ApplyExponentialEaseOut01(float _t, float _rate)
+        {
+            float _clamped = Mathf.Clamp01(_t);
+            float _k = Mathf.Max(0.01f, _rate);
+            float _denominator = 1.0f - Mathf.Exp(-_k);
+            if (_denominator <= 1e-6f)
+            {
+                return _clamped;
+            }
+
+            return (1.0f - Mathf.Exp(-_k * _clamped)) / _denominator;
         }
 
         /// <summary>

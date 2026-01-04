@@ -21,10 +21,6 @@ namespace Assets.Scripts.Runtime
         [Tooltip("Resources folder that contains solar object prefabs. Example: SolarObjects")]
         [SerializeField] private string prefabsResourcesFolder = "SolarObjects";
 
-        [Header("Runtime Controls")]
-        [Tooltip("Enable runtime UI buttons and value labels for live tuning. Example: true")]
-        [SerializeField] private bool enableRuntimeControls = true;
-
         [Header("Time")]
         // Simulation speed multiplier (sim seconds per real second).
         private float timeScale = 1.0f;
@@ -70,10 +66,31 @@ namespace Assets.Scripts.Runtime
         [Tooltip("Sun point light range at realism = 0. Higher = light reaches farther. Example: 1000")]
         [Range(0f, 20000f)]
         [SerializeField] private float sunLightSimulationRange = 1000.0f;
+        [Tooltip("Realism blend multiplier for sun light. Higher = faster increase per realism step. Example: 1.5")]
+        [Range(0.1f, 5f)]
+        [SerializeField] private float sunLightRealismStepMultiplier = 1.5f;
+        [Tooltip("Exponential ease-out rate for sun light intensity realism. Higher = faster early ramp. Example: 2")]
+        [Range(0.1f, 10f)]
+        [SerializeField] private float sunLightRealismIntensityExponent = 6.0f;
 
-        [Header("Hypothetical Objects")]
-        [Tooltip("Show hypothetical objects (Planet X) at startup. Example: false")]
-        [SerializeField] private bool showHypotheticalObjects = false;
+        [Header("Focus Orbit Lines")]
+        [Tooltip("Orbit line near alpha when focused and close (0-255). Example: 15")]
+        [Range(0f, 255f)]
+        [SerializeField] private float focusedOrbitLineNearAlpha = 15.0f;
+        [Tooltip("Orbit line distance scale threshold to apply focus alpha. Example: 1")]
+        [Range(0.01f, 10f)]
+        [SerializeField] private float focusedOrbitLineNearScaleThreshold = 1.0f;
+
+        [Header("Axis Line Tuning")]
+        [Tooltip("Global thickness multiplier for spin axis + world-up lines. Example: 2.5")]
+        [Range(0.1f, 5f)]
+        [SerializeField] private float axisLineThicknessMultiplier = 2.5f;
+        [Tooltip("Length multiplier for star axis/world-up lines. Example: 2")]
+        [Range(0.1f, 5f)]
+        [SerializeField] private float axisLineStarLengthMultiplier = 2.0f;
+        [Tooltip("Length multiplier for non-star axis/world-up lines. Example: 0.5")]
+        [Range(0.1f, 5f)]
+        [SerializeField] private float axisLineNonStarLengthMultiplier = 0.5f;
 
         [Header("Debug")]
         [Tooltip("Log per-object dataset values on spawn. Example: true")]
@@ -154,11 +171,6 @@ namespace Assets.Scripts.Runtime
         public event Action<IReadOnlyList<SolarObject>>? SolarObjectsReady;
 
         /// <summary>
-        /// Current visibility state for hypothetical objects.
-        /// </summary>
-        public bool ShowHypotheticalObjects => showHypotheticalObjects;
-
-        /// <summary>
         /// Raised when the realism level changes.
         /// </summary>
         public event Action<float>? RealismLevelChanged;
@@ -195,6 +207,9 @@ namespace Assets.Scripts.Runtime
         // One-time guard for spawn data logging.
         private bool spawnDataLogged = false;
         private float RealismLevel01 => Mathf.Clamp01(realismLevel);
+
+        // Current focus target for line visibility.
+        private SolarObject? focusedSolarObject = null;
 
         #endregion
 

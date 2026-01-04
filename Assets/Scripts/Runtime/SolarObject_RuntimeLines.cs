@@ -379,11 +379,22 @@ namespace Assets.Scripts.Runtime
             float _lengthMultiplier = Mathf.Clamp(axisLineLengthScale, 0.1f, 2.0f);
             _length *= _lengthMultiplier;
 
+            float _typeLengthMultiplier = 1.0f;
+            if (visualContext != null)
+            {
+                bool _isStar = string.Equals(type, "star", StringComparison.OrdinalIgnoreCase);
+                float _starMultiplier = Mathf.Clamp(visualContext.AxisLineStarLengthMultiplier, 0.1f, 5.0f);
+                float _nonStarMultiplier = Mathf.Clamp(visualContext.AxisLineNonStarLengthMultiplier, 0.1f, 5.0f);
+                _typeLengthMultiplier = _isStar ? _starMultiplier : _nonStarMultiplier;
+            }
+
+            _length *= _typeLengthMultiplier;
+
             if (string.Equals(type, "star", StringComparison.OrdinalIgnoreCase))
             {
                 float _cap = Mathf.Clamp(axisLineStarLengthMaxScale, 0.1f, 3.0f);
-                float _minLen = _baseLen * 1.1f;
-                float _maxLen = _baseLen * _cap;
+                float _minLen = _baseLen * 1.1f * _typeLengthMultiplier;
+                float _maxLen = _baseLen * _cap * _typeLengthMultiplier;
                 if (_maxLen < _minLen)
                 {
                     _maxLen = _minLen;
@@ -522,7 +533,11 @@ namespace Assets.Scripts.Runtime
             if (axisLine != null)
             {
                 float _widthScale = GetAxisLineWidthScale();
-                float _thicknessMultiplier = Mathf.Clamp(axisLineThicknessScale, 0.1f, 5.0f);
+                float _localThickness = Mathf.Clamp(axisLineThicknessScale, 0.1f, 5.0f);
+                float _globalThickness = visualContext != null
+                    ? Mathf.Clamp(visualContext.AxisLineThicknessMultiplier, 0.1f, 5.0f)
+                    : 1.0f;
+                float _thicknessMultiplier = Mathf.Clamp(_localThickness * _globalThickness, 0.1f, 5.0f);
                 float _width = Mathf.Max(
                     0.0001f,
                     axisLineWidth * _scale * 0.5f * _widthScale * _thicknessMultiplier
@@ -535,7 +550,11 @@ namespace Assets.Scripts.Runtime
             if (worldUpLine != null)
             {
                 float _widthScale = GetAxisLineWidthScale();
-                float _thicknessMultiplier = Mathf.Clamp(axisLineThicknessScale, 0.1f, 5.0f);
+                float _localThickness = Mathf.Clamp(axisLineThicknessScale, 0.1f, 5.0f);
+                float _globalThickness = visualContext != null
+                    ? Mathf.Clamp(visualContext.AxisLineThicknessMultiplier, 0.1f, 5.0f)
+                    : 1.0f;
+                float _thicknessMultiplier = Mathf.Clamp(_localThickness * _globalThickness, 0.1f, 5.0f);
                 float _width = Mathf.Max(
                     0.0001f,
                     axisLineWidth * _scale * 0.5f * _widthScale * _thicknessMultiplier
@@ -620,8 +639,19 @@ namespace Assets.Scripts.Runtime
         /// </summary>
         private float GetLineAlphaForScale(float _scale, float _minScale, float _maxScale)
         {
-            float _minAlpha = Mathf.Clamp01(lineAlphaNear / 255.0f);
-            float _maxAlpha = Mathf.Clamp01(lineAlphaFar / 255.0f);
+            return GetLineAlphaForScale(_scale, _minScale, _maxScale, lineAlphaNear, lineAlphaFar);
+        }
+
+        private float GetLineAlphaForScale(
+            float _scale,
+            float _minScale,
+            float _maxScale,
+            float _minAlphaValue,
+            float _maxAlphaValue
+        )
+        {
+            float _minAlpha = Mathf.Clamp01(_minAlphaValue / 255.0f);
+            float _maxAlpha = Mathf.Clamp01(_maxAlphaValue / 255.0f);
             if (_maxAlpha < _minAlpha)
             {
                 float _temp = _minAlpha;
@@ -659,7 +689,40 @@ namespace Assets.Scripts.Runtime
                 _maxScale = Mathf.Max(_maxScale, hypotheticalOrbitFarScale);
             }
 
-            return GetLineAlphaForScale(orbitLineDistanceScale, orbitLineDistanceMinScale, _maxScale);
+            float _minAlpha = lineAlphaNear;
+            float _maxAlpha = lineAlphaFar;
+            if (visualContext != null && IsFocusedObject())
+            {
+                float _threshold = Mathf.Max(0.01f, visualContext.FocusedOrbitLineNearScaleThreshold);
+                if (orbitLineDistanceScale <= _threshold)
+                {
+                    _minAlpha = Mathf.Min(_minAlpha, visualContext.FocusedOrbitLineNearAlpha);
+                }
+            }
+
+            return GetLineAlphaForScale(
+                orbitLineDistanceScale,
+                orbitLineDistanceMinScale,
+                _maxScale,
+                _minAlpha,
+                _maxAlpha
+            );
+        }
+
+        private bool IsFocusedObject()
+        {
+            if (visualContext == null)
+            {
+                return false;
+            }
+
+            string _focusedId = visualContext.FocusedSolarObjectId;
+            if (string.IsNullOrWhiteSpace(_focusedId))
+            {
+                return false;
+            }
+
+            return string.Equals(_focusedId, id, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

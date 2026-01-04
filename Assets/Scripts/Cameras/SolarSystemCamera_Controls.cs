@@ -55,6 +55,8 @@ namespace Assets.Scripts.Cameras
                 overviewPitch = Mathf.Clamp(overviewPitch + _direction.y * _step, -orbitMaxPitchDegrees, orbitMaxPitchDegrees);
                 overviewOrbitInitialized = true;
             }
+
+            lastOrbitInputTime = Time.unscaledTime;
         }
 
         /// <summary>

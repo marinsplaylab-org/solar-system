@@ -97,7 +97,7 @@ namespace Assets.Scripts.Runtime
                 return _profile;
             }
 
-            HelpLogs.Error("SolarObject", $"'{_data.Id}' has invalid camera_focus_profile '{_raw}'.");
+            HelpLogs.Error("SolarObject", $"'{_data.Id}' camera_focus_profile '{_raw}' is incorrect.");
             return CameraFocusProfile.Auto;
         }
 

@@ -55,6 +55,7 @@ namespace Assets.Scripts.Cameras
                     ref overviewPitch,
                     ref overviewOrbitInitialized
                 );
+                ApplyOverviewStartHeightOffset(GetOverviewDistance());
             }
 
             SnapToCurrentMode();
@@ -118,6 +119,16 @@ namespace Assets.Scripts.Cameras
             focusTarget = _solarObject.transform;
             currentMode = CameraMode.Focus;
 
+            if (simulator == null)
+            {
+                simulator = FindFirstObjectByType<SolarSystemSimulator>();
+            }
+
+            if (simulator != null)
+            {
+                simulator.SetFocusedSolarObject(_solarObject);
+            }
+
             if (_isNewTarget)
             {
                 SetFocusZoomForSelection();
@@ -159,6 +170,16 @@ namespace Assets.Scripts.Cameras
 
             currentMode = CameraMode.Overview;
 
+            if (simulator == null)
+            {
+                simulator = FindFirstObjectByType<SolarSystemSimulator>();
+            }
+
+            if (simulator != null)
+            {
+                simulator.SetFocusedSolarObject(null);
+            }
+
             ApplyOverviewDistance();
 
             if (!overviewOrbitInitialized)
@@ -187,6 +208,30 @@ namespace Assets.Scripts.Cameras
             }
 
             overviewTarget = _target;
+        }
+
+        /// <summary>
+        /// Toggle axis, world-up, and spin-direction lines for the focused object.
+        /// </summary>
+        public void ToggleFocusAxisLines(SolarObject _solarObject)
+        {
+            if (_solarObject == null)
+            {
+                HelpLogs.Warn("Camera", "Axis line toggle ignored because solar object is null.");
+                return;
+            }
+
+            if (simulator == null)
+            {
+                simulator = FindFirstObjectByType<SolarSystemSimulator>();
+                if (simulator == null)
+                {
+                    HelpLogs.Warn("Camera", "SolarSystemSimulator not found for axis line toggle.");
+                    return;
+                }
+            }
+
+            simulator.ToggleFocusAxisLines(_solarObject);
         }
         #endregion
     }

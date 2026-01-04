@@ -32,15 +32,14 @@
 - Required components: `SolarSystemCamera`, `Gui_SolarObjectGrid`, `SolarSystemSimulator`
 
 ## Runtime Controls (Optional)
-- Buttons: `TimeScaleMinusButton`, `TimeScalePlusButton`, `RealismMinusButton`, `RealismPlusButton`,
-  `CameraOrbitUpButton`, `CameraOrbitDownButton`, `CameraOrbitLeftButton`, `CameraOrbitRightButton`,
-  `CameraZoomInButton`, `CameraZoomOutButton`
-- Toggles: `HypotheticalToggleButton`, `OrbitLinesToggle`, `SpinAxisToggle`,
-  `WorldUpToggle`, `SpinDirectionToggle`
+- Buttons: `TimeScaleMinusButton`, `TimeScalePlusButton`, `RealismMinusButton`, `RealismPlusButton`
 - Text labels: `TimeScaleValueText`, `RealismValueText`, `AppVersionText`
 - Control levels:
   - Time Scale: Default, 1,000x, 10,000x, 200,000x
   - Realism: 0.00 to 1.00
+- Camera orbit and zoom: drag, scroll, pinch. No UI buttons.
+- Axis, world-up, and spin-direction lines: double-click/tap focused object. Others off.
+- Hypothetical objects: always visible. No toggle.
 
 ## Performance And Known Issues
 - Orbit line segments can be expensive at high counts.
