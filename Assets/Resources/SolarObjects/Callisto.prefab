@@ -159,12 +159,6 @@ MonoBehaviour:
   tidalLockOnlyForMoons: 1
   tidalLockPeriodTolerance: 0.02
   tidalLockFacingOffsetDeg: 0
-  cameraZoomProfile: 1
-  useFocusZoomOverrides: 0
-  focusZoomMinSimulation: 0.15
-  focusZoomMaxSimulation: 1.5
-  focusZoomMinRealistic: 0.4
-  focusZoomMaxRealistic: 1.5
   avatarSprite: {fileID: 21300000, guid: 53600e4febce74c77b60acb782e552b2, type: 3}
 --- !u!135 &-3857667932112287801
 SphereCollider:

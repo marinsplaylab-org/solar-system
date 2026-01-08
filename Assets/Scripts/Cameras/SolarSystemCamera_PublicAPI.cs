@@ -16,6 +16,26 @@ namespace Assets.Scripts.Cameras
         public bool HasOverviewTarget => overviewTarget != null;
 
         /// <summary>
+        /// True when the camera is in focus mode.
+        /// </summary>
+        public bool IsFocusMode => currentMode == CameraMode.Focus;
+
+        /// <summary>
+        /// True when the camera is in overview mode.
+        /// </summary>
+        public bool IsOverviewMode => currentMode == CameraMode.Overview;
+
+        /// <summary>
+        /// Normalized focus zoom fraction. 0 = min, 1 = max.
+        /// </summary>
+        public float FocusZoomNormalized => Mathf.Clamp01(focusZoomNormalized);
+
+        /// <summary>
+        /// Normalized overview zoom fraction. 0 = min, 1 = max.
+        /// </summary>
+        public float OverviewZoomNormalized => Mathf.Clamp01(overviewZoomNormalized);
+
+        /// <summary>
         /// Initialize references and apply the default overview.
         /// </summary>
         public void Initialize()

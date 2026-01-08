@@ -23,6 +23,7 @@ Disclaimer: Visualization only. Not for scientific analysis or ephemeris accurac
 - `SolarObject` handles orbit, spin, and runtime lines per object
 - `SolarSystemJsonLoader` loads and validates JSON
 - `SolarSystemCamera` manages focus and overview controls
+- `SolarObjectBadgeManager` renders and handles icon badges
 - `AGENTS.md` (project rules and automation guidance)
 - `CREDITS.md` (third-party asset attributions)
 
@@ -36,11 +37,12 @@ Disclaimer: Visualization only. Not for scientific analysis or ephemeris accurac
 5. Press Play.
 
 ## Controls
-- Select any object from the UI list or click/tap it in the scene.
+- Select any object from its icon badge or click/tap it in the scene.
 - Drag to orbit around the focused object.
 - Mouse wheel or pinch to zoom.
 - Double-click/tap to toggle axis, world-up, and spin-direction lines.
 - Use the overview button to return to the full system view.
+- Optional: add a badge toggle button wired to `SolarObjectBadgeManager.ToggleBadgesEnabled`.
 
 ## Runtime UI
 The runtime UI auto-binds by name from any Canvas with `Gui_RuntimeControlEvents`.
@@ -56,7 +58,7 @@ Buttons:
 - `RealismMinusButton`
 - `RealismPlusButton`
 
-Time scale levels: Default, 1,000x, 10,000x, 200,000x. Default start is 1,000x.
+Time scale levels (focus): Default, 1,000x, 10,000x, 200,000x. Overview adds 2,000,000x. Default start is 1,000x.
 Realism: 0.00 = simulation scale, 1.00 = dataset scale.
 
 ## Data Model Notes
@@ -108,7 +110,6 @@ Axis, world-up, and spin-direction lines render only for the focused object.
 ## Known Issues
 - Some Saturn moons have incorrect orbit tilt.
 - Some moons are missing correct shadowing.
-- Touch system zoom in/out may be inverted and needs fixing.
 - Asteroid belt is not implemented yet.
 
 ## Code Style

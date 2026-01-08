@@ -16,7 +16,7 @@
 - SolarObject: orbit, spin, runtime lines.
 - SolarSystemJsonLoader: JSON load and validation.
 - SolarSystemCamera: focus and overview rig.
-- Gui_SolarObjectGrid: focus button grid.
+- SolarObjectBadgeManager: icon badges for object selection.
 
 ## Data And Resources
 - JSON dataset: `Assets/Resources/SolarSystemData_J2000_Keplerian_all_moons.json`
@@ -26,21 +26,20 @@
 - Fallback prefab: `Template.prefab`.
 
 ## Scene Contracts
-- Grid layout object name: `SolarObjects_View_Interaction_GridLayoutGroup`
-- Focus button template: `Focus_SolarObject_Button` (inactive)
 - Overview button: `View_SolarSystem_Overview_Button`
-- Focus button TMP child name: `Text`
-- Required components: `SolarSystemCamera`, `Gui_SolarObjectGrid`, `SolarSystemSimulator`
+- Required components: `SolarSystemCamera`, `SolarObjectBadgeManager`, `SolarSystemSimulator`
 
 ## Runtime Controls (Optional)
 - Buttons: `TimeScaleMinusButton`, `TimeScalePlusButton`, `RealismMinusButton`, `RealismPlusButton`
 - Text labels: `TimeScaleValueText`, `RealismValueText`, `AppVersionText`
 - Control levels:
-  - Time Scale: Default, 1,000x, 10,000x, 200,000x
+  - Time Scale (focus): Default, 1,000x, 10,000x, 200,000x
+  - Time Scale (overview): Default, 1,000x, 10,000x, 200,000x, 2,000,000x
   - Realism: 0.00 to 1.00
 - Camera orbit and zoom: drag, scroll, pinch. No UI buttons.
 - Axis, world-up, and spin-direction lines: double-click/tap focused object. Others off.
 - Hypothetical objects: always visible. No toggle.
+- Badge UI toggle: call `SolarObjectBadgeManager.ToggleBadgesEnabled` or `SetBadgesEnabled(bool)`.
 
 ## Performance And Known Issues
 - Orbit line segments can be expensive at high counts.

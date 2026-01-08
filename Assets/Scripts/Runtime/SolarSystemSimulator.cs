@@ -210,12 +210,13 @@ namespace Assets.Scripts.Runtime
 
         // Current focus target for line visibility.
         private SolarObject? focusedSolarObject = null;
+        private bool isOverviewTimeScaleMode = false;
 
         #endregion
 
         #region Runtime Control Levels
         // Level values mapped to control indices.
-        private readonly float[] timeScaleLevels = new float[4];
+        private readonly float[] timeScaleLevels = new float[5];
 
         // Active indices for each control level.
         private int timeScaleLevelIndex = 0;

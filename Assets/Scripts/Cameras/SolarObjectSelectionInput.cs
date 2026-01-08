@@ -1,9 +1,12 @@
 #nullable enable
+using System;
+using System.Collections.Generic;
 using Assets.Scripts.Guis;
 using Assets.Scripts.Helpers.Debugging;
 using Assets.Scripts.Runtime;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
@@ -44,6 +47,9 @@ namespace Assets.Scripts.Cameras
         [Tooltip("Orbit sensitivity per pixel drag. Example: 0.02")]
         [Range(0.001f, 0.2f)]
         [SerializeField] private float dragOrbitSensitivity = 0.017f;
+        [Tooltip("Extra orbit sensitivity multiplier for touch input. Example: 1.3")]
+        [Range(0.1f, 5f)]
+        [SerializeField] private float touchOrbitSensitivityMultiplier = 1.3f;
         [Tooltip("Invert horizontal drag direction. Example: true")]
         [SerializeField] private bool invertDragX = true;
         [Tooltip("Invert vertical drag direction. Example: false")]
@@ -61,18 +67,19 @@ namespace Assets.Scripts.Cameras
         [SerializeField] private bool enablePinchZoom = true;
         [Tooltip("Zoom steps per pixel of pinch delta. Higher = faster zoom. Example: 0.02")]
         [Range(0.001f, 0.2f)]
-        [SerializeField] private float pinchZoomStepsPerPixel = 0.017f;
+        [SerializeField] private float pinchZoomStepsPerPixel = 0.0221f;
         [Tooltip("Minimum pinch delta in pixels before zoom steps apply. Example: 2")]
         [Range(0.1f, 50f)]
         [SerializeField] private float pinchZoomDeadZonePixels = 2f;
-        [Tooltip("Invert pinch zoom direction. Example: false")]
-        [SerializeField] private bool invertPinchZoom = false;
+        [Tooltip("Invert pinch zoom direction. Example: true")]
+        [SerializeField] private bool invertPinchZoom = true;
         #endregion
 
         #region Runtime State
         private bool isPointerDown = false;
         private bool isDragging = false;
         private bool pointerBlockedByUi = false;
+        private bool pointerDownOverBadge = false;
         private int activePointerId = -1;
         private Vector2 pointerDownScreenPos = Vector2.zero;
         private Vector2 lastPointerScreenPos = Vector2.zero;
@@ -82,6 +89,14 @@ namespace Assets.Scripts.Cameras
         private float lastPinchDistance = 0f;
         private SolarObject? lastSelectedSolarObject = null;
         private float lastSelectTime = -1f;
+        private readonly List<RaycastResult> uiRaycastResults = new();
+        #endregion
+
+        #region Public API
+        /// <summary>
+        /// Layer mask used for solar object selection raycasts.
+        /// </summary>
+        public LayerMask SelectionLayerMask => selectionLayerMask;
         #endregion
 
         #region Unity Lifecycle
@@ -143,7 +158,8 @@ namespace Assets.Scripts.Cameras
             lastPointerScreenPos = _screenPos;
             isPointerDown = true;
             isDragging = false;
-            pointerBlockedByUi = ignoreUi && IsPointerOverUi(_pointerId);
+            pointerDownOverBadge = IsPointerOverBadge(_pointerId, _screenPos);
+            pointerBlockedByUi = ignoreUi && IsPointerOverUi(_pointerId) && !pointerDownOverBadge;
         }
 
         private void HandlePointerDrag(Vector2 _screenPos)
@@ -163,7 +179,7 @@ namespace Assets.Scripts.Cameras
             if (isDragging && enableDragOrbit)
             {
                 Vector2 _frameDelta = _screenPos - lastPointerScreenPos;
-                Vector2 _orbitDelta = GetOrbitDeltaFromDrag(_frameDelta);
+                Vector2 _orbitDelta = GetOrbitDeltaFromDrag(_frameDelta, IsTouchPointer(activePointerId));
                 if (_orbitDelta != Vector2.zero)
                 {
                     Gui.NotifyCameraOrbitStepRequested(_orbitDelta);
@@ -175,7 +191,7 @@ namespace Assets.Scripts.Cameras
 
         private void HandlePointerUp(Vector2 _screenPos)
         {
-            if (isPointerDown && !pointerBlockedByUi && !isDragging)
+            if (isPointerDown && !pointerBlockedByUi && !isDragging && !pointerDownOverBadge)
             {
                 TrySelectAtPosition(_screenPos);
             }
@@ -188,14 +204,16 @@ namespace Assets.Scripts.Cameras
             isPointerDown = false;
             isDragging = false;
             pointerBlockedByUi = false;
+            pointerDownOverBadge = false;
             activePointerId = -1;
             pointerDownScreenPos = Vector2.zero;
             lastPointerScreenPos = Vector2.zero;
         }
 
-        private Vector2 GetOrbitDeltaFromDrag(Vector2 _dragDelta)
+        private Vector2 GetOrbitDeltaFromDrag(Vector2 _dragDelta, bool _isTouch)
         {
-            float _scale = Mathf.Max(0.0001f, dragOrbitSensitivity);
+            float _touchMultiplier = _isTouch ? Mathf.Max(0.1f, touchOrbitSensitivityMultiplier) : 1.0f;
+            float _scale = Mathf.Max(0.0001f, dragOrbitSensitivity) * _touchMultiplier;
             float _x = _dragDelta.x * _scale;
             float _y = _dragDelta.y * _scale;
 
@@ -210,6 +228,11 @@ namespace Assets.Scripts.Cameras
             }
 
             return new Vector2(_x, _y);
+        }
+
+        private static bool IsTouchPointer(int _pointerId)
+        {
+            return _pointerId >= 0;
         }
 
         private void HandleScrollZoom()
@@ -247,13 +270,19 @@ namespace Assets.Scripts.Cameras
                 return false;
             }
 
-            if (!TryGetPinchState(out float _distance, out int _pointerIdA, out int _pointerIdB))
+            if (!TryGetPinchState(
+                    out float _distance,
+                    out int _pointerIdA,
+                    out int _pointerIdB,
+                    out Vector2 _posA,
+                    out Vector2 _posB
+                ))
             {
                 ResetPinchState();
                 return false;
             }
 
-            if (ignoreUi && (IsPointerOverUi(_pointerIdA) || IsPointerOverUi(_pointerIdB)))
+            if (ignoreUi && (IsPointerBlockedByUi(_pointerIdA, _posA) || IsPointerBlockedByUi(_pointerIdB, _posB)))
             {
                 ResetPinchState();
                 return true;
@@ -395,6 +424,53 @@ namespace Assets.Scripts.Cameras
             return EventSystem.current.IsPointerOverGameObject();
         }
 
+        private bool IsPointerBlockedByUi(int _pointerId, Vector2 _screenPos)
+        {
+            if (!IsPointerOverUi(_pointerId))
+            {
+                return false;
+            }
+
+            return !IsPointerOverBadge(_pointerId, _screenPos);
+        }
+
+        private bool IsPointerOverBadge(int _pointerId, Vector2 _screenPos)
+        {
+            if (EventSystem.current == null)
+            {
+                return false;
+            }
+
+            PointerEventData _eventData = new PointerEventData(EventSystem.current)
+            {
+                position = _screenPos,
+                pointerId = _pointerId,
+            };
+
+            uiRaycastResults.Clear();
+            EventSystem.current.RaycastAll(_eventData, uiRaycastResults);
+            for (int _i = 0; _i < uiRaycastResults.Count; _i++)
+            {
+                GameObject _hit = uiRaycastResults[_i].gameObject;
+                if (_hit == null)
+                {
+                    continue;
+                }
+
+                if (_hit.GetComponent<Button>() == null)
+                {
+                    continue;
+                }
+
+                if (_hit.name.StartsWith("Badge_", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static bool TryGetPointerDown(out Vector2 _screenPos, out int _pointerId)
         {
             _screenPos = Vector2.zero;
@@ -463,11 +539,19 @@ namespace Assets.Scripts.Cameras
             return !Mathf.Approximately(_delta, 0f);
         }
 
-        private static bool TryGetPinchState(out float _distance, out int _pointerIdA, out int _pointerIdB)
+        private static bool TryGetPinchState(
+            out float _distance,
+            out int _pointerIdA,
+            out int _pointerIdB,
+            out Vector2 _posA,
+            out Vector2 _posB
+        )
         {
             _distance = 0f;
             _pointerIdA = -1;
             _pointerIdB = -1;
+            _posA = Vector2.zero;
+            _posB = Vector2.zero;
 
 #if ENABLE_INPUT_SYSTEM
             if (Touchscreen.current == null)
@@ -500,8 +584,8 @@ namespace Assets.Scripts.Cameras
                 return false;
             }
 
-            Vector2 _posA = _first.position.ReadValue();
-            Vector2 _posB = _second.position.ReadValue();
+            _posA = _first.position.ReadValue();
+            _posB = _second.position.ReadValue();
             _pointerIdA = _first.touchId.ReadValue();
             _pointerIdB = _second.touchId.ReadValue();
             _distance = Vector2.Distance(_posA, _posB);
@@ -525,9 +609,11 @@ namespace Assets.Scripts.Cameras
                 return false;
             }
 
+            _posA = _first.position;
+            _posB = _second.position;
             _pointerIdA = _first.fingerId;
             _pointerIdB = _second.fingerId;
-            _distance = Vector2.Distance(_first.position, _second.position);
+            _distance = Vector2.Distance(_posA, _posB);
             return true;
 #endif
         }

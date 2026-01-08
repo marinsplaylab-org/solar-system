@@ -42,6 +42,10 @@ namespace Assets.Scripts.Runtime
             31,
         };
 
+        private const float OverviewTimeScaleMax = 2_000_000.0f;
+        private const int FocusTimeScaleMaxIndex = 3;
+        private const int OverviewTimeScaleMaxIndex = 4;
+
         /// <summary>
         /// Apply realism blending to the shared visual context.
         /// </summary>
@@ -103,6 +107,7 @@ namespace Assets.Scripts.Runtime
             timeScaleLevels[1] = 1_000.0f;
             timeScaleLevels[2] = 10_000.0f;
             timeScaleLevels[3] = 200_000.0f;
+            timeScaleLevels[4] = OverviewTimeScaleMax;
 
             timeScaleLevelIndex = 1;
             timeScale = timeScaleLevels[timeScaleLevelIndex];
@@ -124,7 +129,7 @@ namespace Assets.Scripts.Runtime
             int _targetIndex = Mathf.Clamp(
                 timeScaleLevelIndex + _step,
                 0,
-                timeScaleLevels.Length - 1
+                GetMaxTimeScaleIndex()
             );
 
             if (_targetIndex == timeScaleLevelIndex)
@@ -136,6 +141,26 @@ namespace Assets.Scripts.Runtime
             timeScale = timeScaleLevels[timeScaleLevelIndex];
 
             UpdateTimeScaleText();
+        }
+
+        private int GetMaxTimeScaleIndex()
+        {
+            return isOverviewTimeScaleMode ? OverviewTimeScaleMaxIndex : FocusTimeScaleMaxIndex;
+        }
+
+        private void ApplyTimeScaleMode(bool _isOverview)
+        {
+            isOverviewTimeScaleMode = _isOverview;
+            int _maxIndex = GetMaxTimeScaleIndex();
+            if (timeScaleLevelIndex > _maxIndex)
+            {
+                timeScaleLevelIndex = _maxIndex;
+                timeScale = timeScaleLevels[timeScaleLevelIndex];
+                if (runtimeControlsInitialized)
+                {
+                    UpdateTimeScaleText();
+                }
+            }
         }
 
         /// <summary>
@@ -197,6 +222,7 @@ namespace Assets.Scripts.Runtime
         {
             focusedSolarObject = _solarObject;
             visualContext.FocusedSolarObjectId = _solarObject != null ? _solarObject.Id : string.Empty;
+            ApplyTimeScaleMode(_solarObject == null);
 
             for (int _i = 0; _i < solarObjectsOrdered.Count; _i++)
             {
