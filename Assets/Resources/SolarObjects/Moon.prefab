@@ -113,9 +113,9 @@ MonoBehaviour:
   orbitLineWidth: 0.06
   axisLineWidth: 0.03
   spinDirectionLineWidth: 0.02
-  orbitLineColor: {r: 0.2, g: 0.7, b: 1, a: 0.9}
-  moonOrbitLineColor: {r: 0.3, g: 0.9, b: 0.5, a: 0.9}
-  dwarfOrbitLineColor: {r: 0.9, g: 0.5, b: 0.9, a: 0.9}
+  orbitLineColor: {r: 0.7, g: 0.7, b: 0.7, a: 0.9}
+  moonOrbitLineColor: {r: 0.7, g: 0.7, b: 0.7, a: 0.9}
+  dwarfOrbitLineColor: {r: 0.7, g: 0.7, b: 0.7, a: 0.9}
   hypotheticalOrbitLineColor: {r: 1, g: 0.2, b: 0.2, a: 0.95}
   axisLineColor: {r: 1, g: 0.8, b: 0.2, a: 0.9}
   worldUpLineColor: {r: 0.7, g: 0.7, b: 0.7, a: 0.8}
@@ -165,7 +165,6 @@ MonoBehaviour:
   focusZoomMaxSimulation: 1.5
   focusZoomMinRealistic: 0.4
   focusZoomMaxRealistic: 1.5
-  avatarSprite: {fileID: 21300000, guid: 756da5e1ebc5c41b4b22a69a536fca5e, type: 3}
 --- !u!135 &4512716460076889748
 SphereCollider:
   m_ObjectHideFlags: 0

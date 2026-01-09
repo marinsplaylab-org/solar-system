@@ -56,10 +56,98 @@ namespace Assets.Scripts.Runtime
             visualContext.AxisLineStarLengthMultiplier = axisLineStarLengthMultiplier;
             visualContext.AxisLineNonStarLengthMultiplier = axisLineNonStarLengthMultiplier;
 
+            float _minAlpha = Mathf.Clamp(orbitSpeedAlphaMin, 0f, 255f);
+            float _maxAlpha = Mathf.Clamp(orbitSpeedAlphaMax, 0f, 255f);
+            if (_maxAlpha < _minAlpha)
+            {
+                float _swap = _minAlpha;
+                _minAlpha = _maxAlpha;
+                _maxAlpha = _swap;
+            }
+
+            visualContext.OrbitSpeedAlphaMin = _minAlpha;
+            visualContext.OrbitSpeedAlphaMax = _maxAlpha;
+            visualContext.OrbitSpeedAlphaExponent = Mathf.Clamp(orbitSpeedAlphaExponent, 0.1f, 3f);
+            CacheOrbitSpeedRange(_db);
+
             if (_db.ById.TryGetValue("sun", out SolarObjectData _sunData))
             {
                 visualContext.ReferenceSolarObjectRadiusKm = _sunData.TruthPhysical?.MeanRadiusKm ?? 695700.0;
             }
+        }
+
+        private void CacheOrbitSpeedRange(SolarSystemJsonLoader.Result _db)
+        {
+            double _minSpeed = double.MaxValue;
+            double _maxSpeed = 0.0;
+
+            foreach (SolarObjectData _data in _db.ById.Values)
+            {
+                if (!TryGetOrbitSpeedKmPerSecond(_data, out double _speed))
+                {
+                    continue;
+                }
+
+                if (_speed <= 0.0)
+                {
+                    continue;
+                }
+
+                _minSpeed = Math.Min(_minSpeed, _speed);
+                _maxSpeed = Math.Max(_maxSpeed, _speed);
+            }
+
+            if (_minSpeed == double.MaxValue)
+            {
+                _minSpeed = 0.0;
+                _maxSpeed = 0.0;
+            }
+
+            visualContext.OrbitSpeedMinKmPerSec = _minSpeed;
+            visualContext.OrbitSpeedMaxKmPerSec = Math.Max(_minSpeed, _maxSpeed);
+        }
+
+        private static bool TryGetOrbitSpeedKmPerSecond(SolarObjectData _data, out double _speed)
+        {
+            _speed = 0.0;
+            TruthOrbitData? _orbit = _data.TruthOrbit;
+            if (_orbit == null)
+            {
+                return false;
+            }
+
+            double _periodSeconds = 0.0;
+            if (_orbit.OrbitalPeriodDays.HasValue)
+            {
+                _periodSeconds = Math.Abs(_orbit.OrbitalPeriodDays.Value) * 86400.0;
+            }
+            else if (_orbit.OrbitalPeriodYears.HasValue)
+            {
+                _periodSeconds = Math.Abs(_orbit.OrbitalPeriodYears.Value) * 365.25 * 86400.0;
+            }
+
+            if (_periodSeconds <= 0.0)
+            {
+                return false;
+            }
+
+            double _semiMajorAxisKm = 0.0;
+            if (_orbit.SemiMajorAxisKm.HasValue)
+            {
+                _semiMajorAxisKm = Math.Abs(_orbit.SemiMajorAxisKm.Value);
+            }
+            else if (_orbit.SemiMajorAxisAU.HasValue)
+            {
+                _semiMajorAxisKm = Math.Abs(_orbit.SemiMajorAxisAU.Value) * 149_597_870.7;
+            }
+
+            if (_semiMajorAxisKm <= 0.0)
+            {
+                return false;
+            }
+
+            _speed = (2.0 * Math.PI * _semiMajorAxisKm) / _periodSeconds;
+            return _speed > 0.0;
         }
         #endregion
 

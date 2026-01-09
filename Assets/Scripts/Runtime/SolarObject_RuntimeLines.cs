@@ -171,11 +171,40 @@ namespace Assets.Scripts.Runtime
             Vector3 _primaryPosition = primaryTransform != null ? primaryTransform.position : Vector3.zero;
             bool _primaryMoved = !hasPrimaryPosition || _primaryPosition != lastPrimaryPosition;
 
-            if (_rebuild || _primaryMoved)
+            bool _useFadeOrdering = enableOrbitLineFade && orbitalPeriodSeconds > 0.0;
+            int _startIndex = 0;
+            bool _fadeIndexChanged = false;
+            if (_useFadeOrdering)
             {
-                for (int _i = 0; _i < orbitPoints.Length; _i++)
+                _startIndex = GetOrbitFadeStartIndex(orbitPoints.Length);
+                _fadeIndexChanged = _startIndex != lastOrbitFadeStartIndex;
+            }
+
+            if (_rebuild || _primaryMoved || _fadeIndexChanged)
+            {
+                if (_useFadeOrdering)
                 {
-                    orbitWorldPoints[_i] = _primaryPosition + orbitPoints[_i];
+                    for (int _i = 0; _i < orbitPoints.Length; _i++)
+                    {
+                        int _sourceIndex = _startIndex - _i;
+                        if (_sourceIndex < 0)
+                        {
+                            _sourceIndex = orbitPoints.Length + _sourceIndex;
+                        }
+
+                        orbitWorldPoints[_i] = _primaryPosition + orbitPoints[_sourceIndex];
+                    }
+
+                    lastOrbitFadeStartIndex = _startIndex;
+                }
+                else
+                {
+                    for (int _i = 0; _i < orbitPoints.Length; _i++)
+                    {
+                        orbitWorldPoints[_i] = _primaryPosition + orbitPoints[_i];
+                    }
+
+                    lastOrbitFadeStartIndex = -1;
                 }
 
                 orbitLine.positionCount = orbitWorldPoints.Length;
@@ -189,6 +218,36 @@ namespace Assets.Scripts.Runtime
             orbitLine.enabled = true;
         }
 
+        private int GetOrbitFadeStartIndex(int _segmentCount)
+        {
+            if (_segmentCount <= 0)
+            {
+                return 0;
+            }
+
+            double _period = orbitalPeriodSeconds;
+            if (_period <= 0.0)
+            {
+                return 0;
+            }
+
+            double _time = lastSimulationTimeSeconds;
+            double _wrapped = _time % _period;
+            if (_wrapped < 0.0)
+            {
+                _wrapped += _period;
+            }
+
+            double _fraction = _wrapped / _period;
+            int _index = (int)Math.Floor(_fraction * _segmentCount);
+            if (_index >= _segmentCount)
+            {
+                _index = 0;
+            }
+
+            return _index;
+        }
+
         /// <summary>
         /// Apply orbit line color based on object type.
         /// </summary>
@@ -199,6 +258,37 @@ namespace Assets.Scripts.Runtime
                 return;
             }
 
+            Color _baseColor = ResolveOrbitLineBaseColor();
+            _baseColor = ApplyLineEmission(_baseColor, orbitLineEmissionMultiplier);
+            float _alpha = GetOrbitLineAlpha();
+            float _headAlpha = _alpha;
+            float _tailAlpha = _alpha;
+
+            if (enableOrbitLineFade)
+            {
+                float _headMultiplier = Mathf.Clamp01(orbitLineHeadAlphaMultiplier);
+                float _tailMultiplier = Mathf.Clamp01(orbitLineTailAlphaMultiplier);
+                _headAlpha = _alpha * _headMultiplier;
+                _tailAlpha = _alpha * _tailMultiplier;
+            }
+
+            Color _start = _baseColor;
+            Color _end = _baseColor;
+            _start.a = _headAlpha;
+            _end.a = _tailAlpha;
+
+            if (orbitLine.startColor != _start || orbitLine.endColor != _end)
+            {
+                orbitLine.startColor = _start;
+                orbitLine.endColor = _end;
+            }
+        }
+
+        /// <summary>
+        /// Resolve the base orbit line color without alpha.
+        /// </summary>
+        private Color ResolveOrbitLineBaseColor()
+        {
             Color _color = orbitLineColor;
             if (isHypothetical)
             {
@@ -213,13 +303,8 @@ namespace Assets.Scripts.Runtime
                 _color = dwarfOrbitLineColor;
             }
 
-            _color.a = GetOrbitLineAlpha();
-
-            if (orbitLine.startColor != _color || orbitLine.endColor != _color)
-            {
-                orbitLine.startColor = _color;
-                orbitLine.endColor = _color;
-            }
+            _color.a = 1.0f;
+            return _color;
         }
 
         /// <summary>
@@ -356,6 +441,7 @@ namespace Assets.Scripts.Runtime
             spinDirectionLine.SetPosition(_arcCount + 2, _endPoint + _arrowRight * _arrowLen);
 
             Color _color = spinDirection >= 0.0f ? spinDirectionProgradeColor : spinDirectionRetrogradeColor;
+            _color = ApplyLineEmission(_color, axisLineEmissionMultiplier);
             _color.a = GetAxisLineAlpha();
             if (spinDirectionLine.startColor != _color || spinDirectionLine.endColor != _color)
             {
@@ -592,6 +678,7 @@ namespace Assets.Scripts.Runtime
             if (axisLine != null)
             {
                 Color _color = axisLineColor;
+                _color = ApplyLineEmission(_color, axisLineEmissionMultiplier);
                 _color.a = _alpha;
                 if (axisLine.startColor != _color || axisLine.endColor != _color)
                 {
@@ -604,6 +691,7 @@ namespace Assets.Scripts.Runtime
             if (worldUpLine != null)
             {
                 Color _color = worldUpLineColor;
+                _color = ApplyLineEmission(_color, axisLineEmissionMultiplier);
                 _color.a = _alpha;
                 if (worldUpLine.startColor != _color || worldUpLine.endColor != _color)
                 {
@@ -679,34 +767,82 @@ namespace Assets.Scripts.Runtime
         }
 
         /// <summary>
-        /// Resolve orbit alpha based on camera distance.
+        /// Resolve orbit alpha based on orbit speed.
         /// </summary>
         private float GetOrbitLineAlpha()
         {
-            float _maxScale = orbitLineDistanceMaxScale * Mathf.Max(0.1f, orbitLineDistanceMaxScaleBoost);
-            if (isHypothetical)
-            {
-                _maxScale = Mathf.Max(_maxScale, hypotheticalOrbitFarScale);
-            }
+            float _alpha = GetOrbitSpeedAlpha();
 
-            float _minAlpha = lineAlphaNear;
-            float _maxAlpha = lineAlphaFar;
             if (visualContext != null && IsFocusedObject())
             {
                 float _threshold = Mathf.Max(0.01f, visualContext.FocusedOrbitLineNearScaleThreshold);
                 if (orbitLineDistanceScale <= _threshold)
                 {
-                    _minAlpha = Mathf.Min(_minAlpha, visualContext.FocusedOrbitLineNearAlpha);
+                    float _focusAlpha = Mathf.Clamp01(visualContext.FocusedOrbitLineNearAlpha / 255.0f);
+                    _alpha = Mathf.Min(_alpha, _focusAlpha);
                 }
             }
 
-            return GetLineAlphaForScale(
-                orbitLineDistanceScale,
-                orbitLineDistanceMinScale,
-                _maxScale,
-                _minAlpha,
-                _maxAlpha
-            );
+            return _alpha;
+        }
+
+        private float GetOrbitSpeedAlpha()
+        {
+            if (!hasOrbit || visualContext == null)
+            {
+                return 1.0f;
+            }
+
+            double _speed = GetMeanOrbitSpeedKmPerSecond();
+            if (_speed <= 0.0)
+            {
+                return 1.0f;
+            }
+
+            double _minSpeed = Math.Max(1e-9, visualContext.OrbitSpeedMinKmPerSec);
+            double _maxSpeed = Math.Max(_minSpeed, visualContext.OrbitSpeedMaxKmPerSec);
+            float _t = GetLogNormalized((float)_speed, (float)_minSpeed, (float)_maxSpeed);
+            float _exponent = Mathf.Max(0.1f, visualContext.OrbitSpeedAlphaExponent);
+            float _curve = Mathf.Pow(_t, _exponent);
+
+            float _minAlpha = Mathf.Clamp(visualContext.OrbitSpeedAlphaMin, 0f, 255f);
+            float _maxAlpha = Mathf.Clamp(visualContext.OrbitSpeedAlphaMax, 0f, 255f);
+            float _alpha = Mathf.Lerp(_minAlpha, _maxAlpha, _curve);
+            return Mathf.Clamp01(_alpha / 255.0f);
+        }
+
+        private double GetMeanOrbitSpeedKmPerSecond()
+        {
+            if (!hasOrbit || orbitalPeriodSeconds <= 0.0 || semiMajorAxisKm <= 0.0)
+            {
+                return 0.0;
+            }
+
+            return (2.0 * Math.PI * semiMajorAxisKm) / orbitalPeriodSeconds;
+        }
+
+        private static float GetLogNormalized(float _value, float _min, float _max)
+        {
+            float _safeMin = Mathf.Max(1e-6f, _min);
+            float _safeMax = Mathf.Max(_safeMin, _max);
+            if (Mathf.Approximately(_safeMin, _safeMax))
+            {
+                return 1.0f;
+            }
+
+            float _logMin = Mathf.Log10(_safeMin);
+            float _logMax = Mathf.Log10(_safeMax);
+            float _logValue = Mathf.Log10(Mathf.Max(_safeMin, _value));
+            return Mathf.InverseLerp(_logMin, _logMax, _logValue);
+        }
+
+        private static Color ApplyLineEmission(Color _color, float _multiplier)
+        {
+            float _emission = Mathf.Max(0.0f, _multiplier);
+            _color.r *= _emission;
+            _color.g *= _emission;
+            _color.b *= _emission;
+            return _color;
         }
 
         private bool IsFocusedObject()

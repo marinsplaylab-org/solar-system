@@ -40,9 +40,9 @@ namespace Assets.Scripts.Runtime
         [Tooltip("Global radius scale at realism = 0. Higher = larger bodies, lower = smaller. Example: 0.25")]
         [Range(0.01f, 2f)]
         [SerializeField] private float simulationGlobalRadiusScale = 0.25f;
-        [Tooltip("Orbit line segments at realism = 0. Higher = smoother, lower = cheaper. Example: 64")]
+        [Tooltip("Orbit line segments at realism = 0. Higher = smoother, lower = cheaper. Example: 256")]
         [Range(16, 1024)]
-        [SerializeField] private int simulationOrbitLineSegments = 64;
+        [SerializeField] private int simulationOrbitLineSegments = 256;
         [Tooltip("Runtime line width scale at realism = 0. Higher = thicker lines, lower = thinner. Example: 0.25")]
         [Range(0.05f, 5f)]
         [SerializeField] private float simulationLineWidthScale = 0.25f;
@@ -80,6 +80,17 @@ namespace Assets.Scripts.Runtime
         [Tooltip("Orbit line distance scale threshold to apply focus alpha. Example: 1")]
         [Range(0.01f, 10f)]
         [SerializeField] private float focusedOrbitLineNearScaleThreshold = 1.0f;
+
+        [Header("Orbit Speed Alpha")]
+        [Tooltip("Orbit line alpha for slowest orbital speeds (0-255). Example: 15")]
+        [Range(0f, 255f)]
+        [SerializeField] private float orbitSpeedAlphaMin = 15.0f;
+        [Tooltip("Orbit line alpha for fastest orbital speeds (0-255). Example: 120")]
+        [Range(0f, 255f)]
+        [SerializeField] private float orbitSpeedAlphaMax = 120.0f;
+        [Tooltip("Orbit speed alpha curve exponent. Lower = more alpha for slow orbits. Example: 1.35")]
+        [Range(0.1f, 3f)]
+        [SerializeField] private float orbitSpeedAlphaExponent = 1.35f;
 
         [Header("Axis Line Tuning")]
         [Tooltip("Global thickness multiplier for spin axis + world-up lines. Example: 2.5")]

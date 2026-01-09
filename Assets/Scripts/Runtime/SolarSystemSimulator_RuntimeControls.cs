@@ -42,7 +42,7 @@ namespace Assets.Scripts.Runtime
             31,
         };
 
-        private const float OverviewTimeScaleMax = 2_000_000.0f;
+        private const float OverviewTimeScaleMax = 20_000_000.0f;
         private const int FocusTimeScaleMaxIndex = 3;
         private const int OverviewTimeScaleMaxIndex = 4;
 

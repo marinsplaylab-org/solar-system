@@ -26,19 +26,20 @@
 - Fallback prefab: `Template.prefab`.
 
 ## Scene Contracts
-- Overview button: `View_SolarSystem_Overview_Button`
 - Required components: `SolarSystemCamera`, `SolarObjectBadgeManager`, `SolarSystemSimulator`
+- Optional scene object: `Overview_Proxy` (camera syncs to last focus position on overview transition)
 
 ## Runtime Controls (Optional)
 - Buttons: `TimeScaleMinusButton`, `TimeScalePlusButton`, `RealismMinusButton`, `RealismPlusButton`
 - Text labels: `TimeScaleValueText`, `RealismValueText`, `AppVersionText`
 - Control levels:
   - Time Scale (focus): Default, 1,000x, 10,000x, 200,000x
-  - Time Scale (overview): Default, 1,000x, 10,000x, 200,000x, 2,000,000x
+  - Time Scale (overview): Default, 1,000x, 10,000x, 200,000x, 20,000,000x
   - Realism: 0.00 to 1.00
 - Camera orbit and zoom: drag, scroll, pinch. No UI buttons.
 - Axis, world-up, and spin-direction lines: double-click/tap focused object. Others off.
 - Hypothetical objects: always visible. No toggle.
+- Badge UI: circle + name label. Planets stay visible in overview until max zoom, then only Sun remains. Focused planet moons show only when close.
 - Badge UI toggle: call `SolarObjectBadgeManager.ToggleBadgesEnabled` or `SetBadgesEnabled(bool)`.
 
 ## Performance And Known Issues

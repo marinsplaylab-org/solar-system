@@ -83,6 +83,10 @@ namespace Assets.Scripts.Cameras
         [Range(0f, 20f)]
         [SerializeField] private float transitionTravelMaxSeconds = 5.0f;
 
+        [Header("Proxy Targets")]
+        [Tooltip("Optional overview proxy object name. Leave empty to skip. Example: Overview_Proxy")]
+        [SerializeField] private string overviewProxyName = "Overview_Proxy";
+
         [Header("Focus Zoom Profiles")]
         [Tooltip("Focus zoom range for moons.")]
         [SerializeField] private FocusZoomRange moonZoomRange = new FocusZoomRange
@@ -233,6 +237,7 @@ namespace Assets.Scripts.Cameras
 
         private Transform? focusTarget;
         private Transform? overviewTarget;
+        private Transform? overviewProxy;
         private SolarObject? focusSolarObject;
 
         private float focusYaw = 0f;
@@ -258,6 +263,10 @@ namespace Assets.Scripts.Cameras
         private Quaternion transitionStartRotation = Quaternion.identity;
         private Vector3 transitionTargetPosition = Vector3.zero;
         private Vector3 transitionTargetLookAt = Vector3.zero;
+        private Vector3 transitionStartLookAt = Vector3.zero;
+        private Vector3 transitionLookAtOverride = Vector3.zero;
+        private bool transitionBlendLookAt = false;
+        private bool transitionLookAtOverrideActive = false;
 
         private float RealismLevel01 => Mathf.Clamp01(realismLevel);
         #endregion

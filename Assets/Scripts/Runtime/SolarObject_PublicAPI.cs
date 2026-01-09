@@ -69,6 +69,8 @@ namespace Assets.Scripts.Runtime
                 return;
             }
 
+            lastSimulationTimeSeconds = _simulationTimeSeconds;
+
             if (hasOrbit)
             {
                 Vector3 _primaryPosition = primaryTransform != null ? primaryTransform.position : Vector3.zero;

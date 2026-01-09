@@ -37,11 +37,13 @@ Disclaimer: Visualization only. Not for scientific analysis or ephemeris accurac
 5. Press Play.
 
 ## Controls
-- Select any object from its icon badge or click/tap it in the scene.
+- Select any object from its circle badge label or click/tap it in the scene.
 - Drag to orbit around the focused object.
 - Mouse wheel or pinch to zoom.
 - Double-click/tap to toggle axis, world-up, and spin-direction lines.
-- Use the overview button to return to the full system view.
+- Zoom out past focus max to enter the full system overview.
+- At max overview zoom, only the Sun badge remains visible.
+- Focused planet moon badges show only when you are zoomed in close.
 - Optional: add a badge toggle button wired to `SolarObjectBadgeManager.ToggleBadgesEnabled`.
 
 ## Runtime UI
@@ -58,7 +60,7 @@ Buttons:
 - `RealismMinusButton`
 - `RealismPlusButton`
 
-Time scale levels (focus): Default, 1,000x, 10,000x, 200,000x. Overview adds 2,000,000x. Default start is 1,000x.
+Time scale levels (focus): Default, 1,000x, 10,000x, 200,000x. Overview adds 20,000,000x. Default start is 1,000x.
 Realism: 0.00 = simulation scale, 1.00 = dataset scale.
 
 ## Data Model Notes

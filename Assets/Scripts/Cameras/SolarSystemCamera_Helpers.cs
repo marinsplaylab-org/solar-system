@@ -158,6 +158,14 @@ namespace Assets.Scripts.Cameras
             transitionStartPosition = mainCamera.transform.position;
             transitionStartRotation = mainCamera.transform.rotation;
             transitionTargetLookAt = _target.position;
+            transitionStartLookAt = transitionTargetLookAt;
+            transitionBlendLookAt = false;
+            if (transitionLookAtOverrideActive)
+            {
+                transitionStartLookAt = transitionLookAtOverride;
+                transitionBlendLookAt = true;
+                transitionLookAtOverrideActive = false;
+            }
             transitionTargetPosition = GetDesiredCameraPosition(_mode, _target);
 
             Quaternion _targetRotation = GetLookRotation(transitionTargetLookAt, transitionStartPosition);
@@ -200,6 +208,18 @@ namespace Assets.Scripts.Cameras
             transitionTargetLookAt = _target.position;
             transitionTargetPosition = GetDesiredCameraPosition(transitionMode, _target);
 
+            Vector3 _lookAt = transitionTargetLookAt;
+            if (transitionBlendLookAt)
+            {
+                float _total = Mathf.Max(0.0001f, transitionAlignDuration + transitionTravelDuration);
+                float _elapsed = transitionPhase == TransitionPhase.Align
+                    ? transitionTimer
+                    : transitionAlignDuration + transitionTimer;
+                float _t = Mathf.Clamp01(_elapsed / _total);
+                float _ease = SmoothStep01(_t);
+                _lookAt = Vector3.Lerp(transitionStartLookAt, transitionTargetLookAt, _ease);
+            }
+
             transitionTimer += _dt;
 
             if (transitionPhase == TransitionPhase.Align)
@@ -210,7 +230,7 @@ namespace Assets.Scripts.Cameras
                 float _moveT = _eased * Mathf.Clamp01(transitionAlignMoveFraction);
 
                 Vector3 _position = Vector3.Lerp(transitionStartPosition, transitionTargetPosition, _moveT);
-                Quaternion _targetRotation = GetLookRotation(transitionTargetLookAt, transitionStartPosition);
+                Quaternion _targetRotation = GetLookRotation(_lookAt, transitionStartPosition);
                 Quaternion _rotation = Quaternion.Slerp(transitionStartRotation, _targetRotation, _eased);
 
                 mainCamera.transform.SetPositionAndRotation(_position, _rotation);
@@ -233,7 +253,7 @@ namespace Assets.Scripts.Cameras
                 float _eased = SmoothStep01(_t);
 
                 Vector3 _position = Vector3.Lerp(transitionStartPosition, transitionTargetPosition, _eased);
-                Quaternion _targetRotation = GetLookRotation(transitionTargetLookAt, _position);
+                Quaternion _targetRotation = GetLookRotation(_lookAt, _position);
                 Quaternion _rotation = Quaternion.Slerp(transitionStartRotation, _targetRotation, _eased);
 
                 mainCamera.transform.SetPositionAndRotation(_position, _rotation);
@@ -373,6 +393,26 @@ namespace Assets.Scripts.Cameras
             focusZoomNormalized = Mathf.Clamp01(focusSelectZoomFraction);
         }
 
+        private void AlignOverviewToCurrentCamera()
+        {
+            if (mainCamera == null || overviewTarget == null)
+            {
+                return;
+            }
+
+            Vector3 _position = mainCamera.transform.position;
+            float _distance = Vector3.Distance(_position, overviewTarget.position);
+            SyncOverviewZoomNormalizedFromDistance(_distance);
+
+            SyncOrbitToCameraView(
+                overviewTarget,
+                GetOverviewOrbitRadius(_distance),
+                ref overviewYaw,
+                ref overviewPitch,
+                ref overviewOrbitInitialized
+            );
+        }
+
         private void SyncOverviewZoomNormalizedFromDistance(float _distance)
         {
             GetOverviewZoomRange(out float _minDistance, out float _maxDistance);
@@ -496,6 +536,43 @@ namespace Assets.Scripts.Cameras
             }
 
             TryAssignOverviewTargetFromSimulator();
+        }
+
+        private void EnsureOverviewProxy()
+        {
+            if (overviewProxy != null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(overviewProxyName))
+            {
+                return;
+            }
+
+            GameObject _proxyObject = GameObject.Find(overviewProxyName);
+            if (_proxyObject == null)
+            {
+                return;
+            }
+
+            overviewProxy = _proxyObject.transform;
+        }
+
+        private void SyncOverviewProxyFromCamera()
+        {
+            if (mainCamera == null)
+            {
+                return;
+            }
+
+            EnsureOverviewProxy();
+            if (overviewProxy == null)
+            {
+                return;
+            }
+
+            overviewProxy.position = mainCamera.transform.position;
         }
 
         private void TryAssignOverviewTargetFromSimulator()

@@ -26,6 +26,28 @@ namespace Assets.Scripts.Cameras
         public bool IsOverviewMode => currentMode == CameraMode.Overview;
 
         /// <summary>
+        /// Current focused solar object (null when in overview).
+        /// </summary>
+        public SolarObject? FocusedSolarObject => focusSolarObject;
+
+        /// <summary>
+        /// Get the focus zoom range for a solar object.
+        /// </summary>
+        public bool TryGetFocusZoomRange(SolarObject _solarObject, out float _minDistance, out float _maxDistance)
+        {
+            _minDistance = 0f;
+            _maxDistance = 0f;
+
+            if (_solarObject == null)
+            {
+                return false;
+            }
+
+            GetFocusZoomRange(_solarObject, out _minDistance, out _maxDistance);
+            return true;
+        }
+
+        /// <summary>
         /// Normalized focus zoom fraction. 0 = min, 1 = max.
         /// </summary>
         public float FocusZoomNormalized => Mathf.Clamp01(focusZoomNormalized);
@@ -181,11 +203,23 @@ namespace Assets.Scripts.Cameras
                 return;
             }
 
+            bool _wasFocusMode = currentMode == CameraMode.Focus;
             EnsureOverviewTarget();
             if (overviewTarget == null)
             {
                 HelpLogs.Warn("Camera", "Overview target not found.");
                 return;
+            }
+
+            if (_wasFocusMode)
+            {
+                SyncOverviewProxyFromCamera();
+                AlignOverviewToCurrentCamera();
+                if (focusTarget != null)
+                {
+                    transitionLookAtOverride = focusTarget.position;
+                    transitionLookAtOverrideActive = true;
+                }
             }
 
             currentMode = CameraMode.Overview;
@@ -202,7 +236,7 @@ namespace Assets.Scripts.Cameras
 
             ApplyOverviewDistance();
 
-            if (!overviewOrbitInitialized)
+            if (!_wasFocusMode && !overviewOrbitInitialized)
             {
                 SyncOrbitToCameraView(
                     overviewTarget,

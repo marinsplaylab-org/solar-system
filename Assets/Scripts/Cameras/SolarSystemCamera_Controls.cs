@@ -85,6 +85,12 @@ namespace Assets.Scripts.Cameras
                     return;
                 }
 
+                if (_delta > 0 && focusZoomNormalized >= 0.999f)
+                {
+                    ShowOverview();
+                    return;
+                }
+
                 AdjustFocusZoomNormalized(_delta);
             }
             else

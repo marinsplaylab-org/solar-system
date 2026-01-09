@@ -44,12 +44,12 @@ namespace Assets.Scripts.Cameras
         [Tooltip("Drag distance in pixels before a drag is active. Example: 8")]
         [Range(1f, 200f)]
         [SerializeField] private float dragStartThresholdPixels = 8f;
-        [Tooltip("Orbit sensitivity per pixel drag. Example: 0.02")]
+        [Tooltip("Orbit sensitivity per pixel drag. Example: 0.021")]
         [Range(0.001f, 0.2f)]
-        [SerializeField] private float dragOrbitSensitivity = 0.017f;
-        [Tooltip("Extra orbit sensitivity multiplier for touch input. Example: 1.3")]
+        [SerializeField] private float dragOrbitSensitivity = 0.02125f;
+        [Tooltip("Extra orbit sensitivity multiplier for touch input. Example: 1.04")]
         [Range(0.1f, 5f)]
-        [SerializeField] private float touchOrbitSensitivityMultiplier = 1.3f;
+        [SerializeField] private float touchOrbitSensitivityMultiplier = 1.04f;
         [Tooltip("Invert horizontal drag direction. Example: true")]
         [SerializeField] private bool invertDragX = true;
         [Tooltip("Invert vertical drag direction. Example: false")]
@@ -58,16 +58,16 @@ namespace Assets.Scripts.Cameras
         [Header("Zoom Input")]
         [Tooltip("Enable mouse wheel zoom. Example: true")]
         [SerializeField] private bool enableScrollZoom = true;
-        [Tooltip("Zoom steps per mouse wheel unit. Higher = faster zoom. Example: 2")]
+        [Tooltip("Zoom steps per mouse wheel unit. Higher = faster zoom. Example: 1.87")]
         [Range(0.1f, 10f)]
-        [SerializeField] private float scrollZoomStepsPerUnit = 1.7f;
+        [SerializeField] private float scrollZoomStepsPerUnit = 1.87f;
         [Tooltip("Invert mouse wheel zoom direction. Example: true")]
         [SerializeField] private bool invertScrollZoom = true;
         [Tooltip("Enable pinch zoom on touch devices. Example: true")]
         [SerializeField] private bool enablePinchZoom = true;
-        [Tooltip("Zoom steps per pixel of pinch delta. Higher = faster zoom. Example: 0.02")]
+        [Tooltip("Zoom steps per pixel of pinch delta. Higher = faster zoom. Example: 0.029")]
         [Range(0.001f, 0.2f)]
-        [SerializeField] private float pinchZoomStepsPerPixel = 0.0221f;
+        [SerializeField] private float pinchZoomStepsPerPixel = 0.0287f;
         [Tooltip("Minimum pinch delta in pixels before zoom steps apply. Example: 2")]
         [Range(0.1f, 50f)]
         [SerializeField] private float pinchZoomDeadZonePixels = 2f;

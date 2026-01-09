@@ -38,6 +38,13 @@ namespace Assets.Scripts.Runtime
             public float FocusedOrbitLineNearAlpha = 15.0f;
             public float FocusedOrbitLineNearScaleThreshold = 1.0f;
 
+            // Orbit speed alpha tuning.
+            public float OrbitSpeedAlphaMin = 30.0f;
+            public float OrbitSpeedAlphaMax = 200.0f;
+            public float OrbitSpeedAlphaExponent = 1.0f;
+            public double OrbitSpeedMinKmPerSec = 0.0;
+            public double OrbitSpeedMaxKmPerSec = 0.0;
+
             // Blend per-object visual_defaults multipliers (0 = off, 1 = full).
             public float VisualDefaultsBlend = 1.0f;
 
@@ -112,6 +119,24 @@ namespace Assets.Scripts.Runtime
         [Tooltip("Maximum line alpha when far from the camera. Higher = more opaque. Example: 110")]
         [Range(0f, 255f)]
         [SerializeField] private float lineAlphaFar = 110.0f;
+
+        [Header("Line Emission")]
+        [Tooltip("Orbit line emission multiplier. Higher = brighter lines (HDR). Example: 1.6")]
+        [Range(0.1f, 10f)]
+        [SerializeField] private float orbitLineEmissionMultiplier = 1.6f;
+        [Tooltip("Axis/world-up emission multiplier. Higher = brighter lines (HDR). Example: 1.4")]
+        [Range(0.1f, 10f)]
+        [SerializeField] private float axisLineEmissionMultiplier = 1.4f;
+
+        [Header("Orbit Line Fade")]
+        [Tooltip("Fade orbit line alpha along the path. Example: true")]
+        [SerializeField] private bool enableOrbitLineFade = true;
+        [Tooltip("Head alpha multiplier for orbit line fade. Example: 1")]
+        [Range(0f, 1f)]
+        [SerializeField] private float orbitLineHeadAlphaMultiplier = 1.0f;
+        [Tooltip("Tail alpha multiplier for orbit line fade. Example: 0.1")]
+        [Range(0f, 1f)]
+        [SerializeField] private float orbitLineTailAlphaMultiplier = 0.1f;
 
         [Header("Spin Direction Arc")]
         [Tooltip("Arc radius multiplier relative to body radius. Higher = arc farther from body. Example: 1.1")]
@@ -229,9 +254,6 @@ namespace Assets.Scripts.Runtime
         [Range(-180f, 180f)]
         [SerializeField] private float tidalLockFacingOffsetDeg = 0.0f;
 
-        [Header("UI")]
-        [Tooltip("Sprite used for runtime UI avatar buttons. Example: Earth_Icon")]
-        [SerializeField] private Sprite? avatarSprite;
         #endregion
 
         #region Runtime State
@@ -281,6 +303,8 @@ namespace Assets.Scripts.Runtime
         private Vector3[]? orbitWorldPoints;
         private bool orbitPointsDirty = true;
         private float minOrbitRadiusUnity = 0.0f;
+        private double lastSimulationTimeSeconds = 0.0;
+        private int lastOrbitFadeStartIndex = -1;
 
         // Runtime renderers.
         private LineRenderer? orbitLine;
@@ -351,14 +375,14 @@ namespace Assets.Scripts.Runtime
         public float AxialTiltDeg => axialTiltDeg;
 
         /// <summary>
-        /// Sprite used for UI avatar buttons.
-        /// </summary>
-        public Sprite? AvatarSprite => avatarSprite;
-
-        /// <summary>
         /// Camera zoom profile for focus navigation.
         /// </summary>
         public CameraFocusProfile FocusProfile => cameraFocusProfile;
+
+        /// <summary>
+        /// Orbit line base color for this object (alpha not applied).
+        /// </summary>
+        public Color OrbitLineBaseColor => ResolveOrbitLineBaseColor();
 
         /// <summary>
         /// Diameter normalized to ignore the global radius multiplier.
